@@ -31,7 +31,7 @@ while True:
     if cv2.waitKey(1) == ord('s'):
         break
 
-# Release the capture and writer objects
+# Release the capture and writer object
 cam.release()
 out.release()
 cv2.destroyAllWindows()
