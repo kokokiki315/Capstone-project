@@ -3,8 +3,17 @@ import cv2
 #Import matplotlib
 from matplotlib import pyplot as plt
 
-import datetime
+from ultralytics import YOLO
 
+import datetime
+#https://docs.ultralytics.com/modes/track/#why-choose-ultralytics-yolo-for-object-tracking
+# Load a model
+model = YOLO("yolo11n.pt")  # load an official detection model
+model = YOLO("yolo11n-seg.pt")  # load an official segmentation model
+model = YOLO("path/to/best.pt")  # load a custom model
+
+# Track with the model
+results = model.track(source="0", show=True, tracker="bytetrack.yaml")
 cam = cv2.VideoCapture(0)
 
 # Get the default frame width and height
