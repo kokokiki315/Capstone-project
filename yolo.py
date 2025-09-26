@@ -1,3 +1,4 @@
+import cv2
 from ultralytics import YOLO
 
 # Configure the tracking parameters and run the tracker
