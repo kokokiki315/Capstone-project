@@ -416,7 +416,6 @@ def camera_processing():
             small_frame = cv2.resize(annotated_frame, (STREAM_WIDTH, STREAM_HEIGHT))
             with lock:
                 outputFrame = small_frame.copy()
-a
             # --- MQTT LOGIC ---
             if mqtt_client:
                 if "car" in detected_classes and (current_time - last_publish["car"] > PUBLISH_COOLDOWN):
