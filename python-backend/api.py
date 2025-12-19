@@ -4,16 +4,15 @@ import PIL.Image
 from db import storeevent
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Configure the official Google API
+# Configure API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def geminiApi(filename):
     content = "API_ERROR"
     
-    # Prompt for your automation logic
+    # Standard prompt
     prompt_text = (
         "Analyze this security camera image and classify the situation:\n"
         "1. If you see a delivery courier or someone holding a package, say 'ALERT: DELIVERY'.\n"
@@ -23,26 +22,29 @@ def geminiApi(filename):
     )
     
     try:
-        api_key = os.getenv("GOOGLE_API_KEY")
-        print(f"DEBUG: Loaded API Key: {api_key[:5]}..." if api_key else "DEBUG: NO API KEY FOUND")       
-        # 1. Load the Model
-        model = genai.GenerativeModel('gemini-2.5-flash-lite')
-
-        # 2. Load the Image directly (No complex Base64 needed!)
+        # --- FIX 1: Use the specific model version ---
+        model = genai.GenerativeModel('gemini-1.5-flash-latest') 
+        
+        # --- FIX 2: Debug Print ---
+        print(f"[DEBUG] Sending {filename} to Google AI...")
+        
         img = PIL.Image.open(filename)
-
-        # 3. Send Request
         response = model.generate_content([prompt_text, img])
         
-        # 4. Get Text
         content = response.text.strip()
-        print("GOOGLE API SUCCESS:", content)
+        print(f"[SUCCESS] AI Response: {content}")
 
     except Exception as e:
-        print("GOOGLE API EXCEPTION:", e)
-        content = "System Error"
+        # --- FIX 3: Print the ACTUAL error ---
+        print(f"[CRITICAL ERROR] Google AI Failed: {e}")
+        # Fallback: If Flash fails, try the older model just to test connection
+        if "404" in str(e):
+             print("[TIP] Try running: pip install -U google-generativeai")
 
     finally:
-        # 5. Save to DB and Return
-        storeevent(os.path.basename(filename), content)
+        try:
+            storeevent(os.path.basename(filename), content)
+        except Exception as db_e:
+            print(f"[DB ERROR] Could not save to database: {db_e}")
+            
         return content
