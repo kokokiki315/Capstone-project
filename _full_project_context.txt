@@ -1,0 +1,4588 @@
+
+========================================
+FILE START: .\train_finetune.py
+========================================
+# from ultralytics import YOLO
+
+# if __name__ == "__main__":
+#     from multiprocessing import freeze_support
+#     freeze_support()  # needed for Windows
+
+#     model = YOLO(r"C:\Users\jy\Desktop\Capstone project\runs\detect\train_dataset1\weights\best.pt")
+
+#     model.train(
+#         data=r"C:\Users\jy\Desktop\Capstone project\combined_dataset\data.yaml",
+#         epochs=100,
+#         batch=16,
+#         imgsz=720,
+#         name="train_dataset_finetune"
+#     )
+
+from ultralytics import YOLO
+
+# Load the trained model
+model = YOLO(r"C:\Users\jy\Desktop\Capstone project\runs\detect\train_dataset_finetune\weights\best.pt")
+
+# Validate accuracy on dataset
+results = model.val(data=r"C:\Users\jy\Desktop\Capstone project\combined_dataset\data.yaml")
+
+print(results)
+
+def update_hardware_state(threat_level):
+    """
+    Changes Tuya smart bulb color based on AI threat assessment.
+    """
+    if threat_level == "HIGH":
+        # Trigger Visual Alarm (Red Light)
+        d.set_status(True, switch=1)
+        d.set_value(1, 'colour_data_v2', {"h": 0, "s": 1000, "v": 1000})
+        print("[IOT] ALERT: System set to RED.")
+
+    elif threat_level == "LOW":
+        # Revert to Normal Monitoring (White Light)
+        d.set_status(True, switch=1)
+        d.set_value(1, 'temp_value_v2', 1000)
+        print("[IOT] NORMAL: System set to WHITE.")
+
+FILE END: .\train_finetune.py
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\keywords.txt
+========================================
+#######################################
+# Syntax Coloring Map ESP32_Servo
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Servo	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+attach	KEYWORD2
+detach	KEYWORD2
+write	KEYWORD2
+read	KEYWORD2
+attached	KEYWORD2
+writeMicroseconds	KEYWORD2
+readMicroseconds	KEYWORD2
+setTimerWidth 		KEYWORD2
+readTimerWidth		KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\keywords.txt
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\README.md
+========================================
+# Servo Library for ESP32
+
+Specifically for the V3.0.0 of Arduino ESP32. All ADC's have been updated to work correctly with the new release
+
+https://github.com/espressif/arduino-esp32/releases
+
+This library attempts to faithfully replicate the semantics of the
+Arduino Servo library (see http://www.arduino.cc/en/Reference/Servo)
+for the ESP32, with two (optional) additions. The two new functions
+expose the ability of the ESP32 PWM timers to vary timer width.
+# Documentation by Doxygen
+
+[ESP32Servo Doxygen](https://madhephaestus.github.io/ESP32Servo/annotated.html)
+
+## License
+
+Copyright (c) 2017 John K. Bennett.  All right reserved.
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+## Library Description:
+```
+    Servo - Class for manipulating servo motors connected to ESP32 pins.
+    
+    int attach(pin )  - Attaches the given GPIO pin to the next free channel
+        (channels that have previously been detached are used first), 
+        returns channel number or 0 if failure. All pin numbers are allowed,
+        but only pins 2,4,12-19,21-23,25-27,32-33 are recommended.
+    
+    int attach(pin, min, max  ) - Attaches to a pin setting min and max 
+        values in microseconds; enforced minimum min is 500, enforced max
+        is 2500. Other semantics are the same as attach().
+    
+    void write () - Sets the servo angle in degrees; a value below 500 is
+        treated as a value in degrees (0 to 180). These limit are enforced,
+        i.e., values are constrained as follows:
+            Value                                   Becomes
+            -----                                   -------
+            < 0                                        0
+            0 - 180                                  value (treated as degrees)
+            181 - 499                                 180
+            500 - (min-1)                             min
+            min-max (from attach or default)         value (treated as microseconds)
+            (max+1) - 2500                            max
+    
+    void writeMicroseconds() - Sets the servo pulse width in microseconds.
+        min and max are enforced (see above). 
+        
+    int read() - Gets the last written servo pulse width as an angle between 0 and 180. 
+    
+    int readMicroseconds()   - Gets the last written servo pulse width in microseconds.
+    
+    bool attached() - Returns true if this servo instance is attached to a pin.
+    
+    void detach() - Stops an the attached servo, frees the attached pin, and frees
+        its channel for reuse.  
+```
+
+### **New ESP32-specific functions**
+ 
+```
+    setTimerWidth(value) - Sets the PWM timer width (must be 16-20) (ESP32 ONLY);
+        as a side effect, the pulse width is recomputed.
+
+    int readTimerWidth() - Gets the PWM timer width (ESP32 ONLY) 
+```
+ 
+### Useful Defaults:
+
+default min pulse width for attach(): 544us
+
+default max pulse width for attach(): 2400us
+
+default timer width 16 (if timer width is not set)
+
+default pulse width 1500us (servos are initialized with this value)
+
+MINIMUM pulse with: 500us
+
+MAXIMUM pulse with: 2500us
+
+MAXIMUM number of servos: 16 (this is the number of PWM channels in the ESP32)  
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\README.md
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\src\ESP32PWM.cpp
+========================================
+/*
+ * ESP32PWM.cpp
+ *
+ *  Created on: Sep 22, 2018
+ *      Author: hephaestus
+ */
+
+#include <ESP32PWM.h>
+#include "esp32-hal-ledc.h"
+
+// initialize the class variable ServoCount
+int ESP32PWM::PWMCount = -1;              // the total number of attached servos
+bool  ESP32PWM::explicateAllocationMode=false;
+ESP32PWM * ESP32PWM::ChannelUsed[NUM_PWM]; // used to track whether a channel is in service
+long ESP32PWM::timerFreqSet[4] = { -1, -1, -1, -1 };
+int ESP32PWM::timerCount[4] = { 0, 0, 0, 0 };
+
+static const char* TAG = "ESP32PWM";
+
+// The ChannelUsed array elements are 0 if never used, 1 if in use, and -1 if used and disposed
+// (i.e., available for reuse)
+/**
+ * allocateTimer
+ * @param a timer number 0-3 indicating which timer to allocate in this library
+ * Switch to explicate allocation mode
+ *
+ */
+void ESP32PWM::allocateTimer(int timerNumber){
+	if(timerNumber<0 || timerNumber>3)
+		return;
+	if(ESP32PWM::explicateAllocationMode==false){
+		ESP32PWM::explicateAllocationMode=true;
+		for(int i=0;i<4;i++)
+			ESP32PWM::timerCount[i]=4;// deallocate all timers to start mode
+	}
+	ESP32PWM::timerCount[timerNumber]=0;
+}
+
+ESP32PWM::ESP32PWM() {
+	resolutionBits = 8;
+	pwmChannel = -1;
+	pin = -1;
+	myFreq = -1;
+	if (PWMCount == -1) {
+		for (int i = 0; i < NUM_PWM; i++)
+			ChannelUsed[i] = NULL; // load invalid data into the storage array of pin mapping
+		PWMCount = PWM_BASE_INDEX; // 0th channel does not work with the PWM system
+	}
+}
+
+ESP32PWM::~ESP32PWM() {
+	if (attached()) {
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+		ledcDetach(pin);
+#else
+		ledcDetachPin(pin);
+#endif
+#else
+		ledcDetachPin(pin);
+#endif
+	}
+	deallocate();
+}
+
+double ESP32PWM::_ledcSetupTimerFreq(uint8_t pin, double freq,
+		uint8_t bit_num, uint8_t channel) {
+
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+	return ledcAttachChannel(pin, freq, bit_num, channel);
+#else
+	return ledcSetup(channel, freq, bit_num);
+#endif
+#else
+	return ledcSetup(channel, freq, bit_num);
+#endif
+
+}
+
+int ESP32PWM::timerAndIndexToChannel(int timerNum, int index) {
+	int localIndex = 0;
+	for (int j = 0; j < NUM_PWM; j++) {
+		if (((j / 2) % 4) == timerNum) {
+			if (localIndex == index) {
+				return j;
+			}
+			localIndex++;
+		}
+	}
+	return -1;
+}
+int ESP32PWM::allocatenext(double freq) {
+	long freqlocal = (long) freq;
+	if (pwmChannel < 0) {
+		for (int i = 0; i < 4; i++) {
+			bool freqAllocated = ((timerFreqSet[i] == freqlocal)
+					|| (timerFreqSet[i] == -1));
+			if (freqAllocated && timerCount[i] < 4) {
+				if (timerFreqSet[i] == -1) {
+					//Serial.println("Starting timer "+String(i)+" at freq "+String(freq));
+					timerFreqSet[i] = freqlocal;
+				}
+				//Serial.println("Free channel timer "+String(i)+" at freq "+String(freq)+" remaining "+String(4-timerCount[i]));
+
+				timerNum = i;
+				for (int index=0; index<4; ++index)
+				{
+					int myTimerNumber = timerAndIndexToChannel(timerNum,index);
+					if ((myTimerNumber >= 0)  && (!ChannelUsed[myTimerNumber]))
+					{
+						pwmChannel = myTimerNumber;
+// 						Serial.println(
+// 							"PWM on ledc channel #" + String(pwmChannel)
+// 									+ " using 'timer " + String(timerNum)
+// 									+ "' to freq " + String(freq) + "Hz");
+						ChannelUsed[pwmChannel] = this;
+						timerCount[timerNum]++;
+						PWMCount++;
+						myFreq = freq;
+						return pwmChannel;
+					}
+				}
+			} else {
+//				if(timerFreqSet[i]>0)
+//					Serial.println("Timer freq mismatch target="+String(freq)+" on timer "+String(i)+" was "+String(timerFreqSet[i]));
+//				else
+//					Serial.println("Timer out of channels target="+String(freq)+" on timer "+String(i)+" was "+String(timerCount[i]));
+			}
+		}
+	} else {
+		return pwmChannel;
+	}
+	ESP_LOGE(TAG, 
+			"ERROR All PWM timers allocated! Can't accomodate %.3f Hz\r\nHalting...", freq);
+	while (1)
+		;
+}
+void ESP32PWM::deallocate() {
+	if (pwmChannel < 0)
+		return;
+	ESP_LOGI(TAG, "PWM deallocating LEDc #%d",pwmChannel);
+	timerCount[getTimer()]--;
+	if (timerCount[getTimer()] == 0) {
+		timerFreqSet[getTimer()] = -1; // last pwn closed out
+	}
+	timerNum = -1;
+	attachedState = false;
+	ChannelUsed[pwmChannel] = NULL;
+	pwmChannel = -1;
+	PWMCount--;
+
+}
+
+int ESP32PWM::getChannel() {
+	if (pwmChannel < 0) {
+		ESP_LOGE(TAG, "FAIL! must setup() before using get channel!");
+	}
+	return pwmChannel;
+}
+
+double ESP32PWM::setup(double freq, uint8_t resolution_bits) {
+	checkFrequencyForSideEffects(freq);
+
+	resolutionBits = resolution_bits;
+	if (attached()) {
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+		ledcDetach(pin);
+		double val = ledcAttachChannel(getPin(), freq, resolution_bits, getChannel());
+#else
+		ledcDetachPin(pin);
+		double val = ledcSetup(getChannel(), freq, resolution_bits);
+#endif
+#else
+		ledcDetachPin(pin);
+		double val = ledcSetup(getChannel(), freq, resolution_bits);
+#endif
+
+		attachPin(pin);
+		return val;
+	}
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+	return ledcAttachChannel(getPin(), freq, resolution_bits, getChannel());
+#else
+	return ledcSetup(getChannel(), freq, resolution_bits);
+#endif
+#else
+	return ledcSetup(getChannel(), freq, resolution_bits);
+#endif
+}
+double ESP32PWM::getDutyScaled() {
+	return mapf((double) myDuty, 0, (double) ((1 << resolutionBits) - 1), 0.0,
+			1.0);
+}
+void ESP32PWM::writeScaled(double duty) {
+	write(mapf(duty, 0.0, 1.0, 0, (double) ((1 << resolutionBits) - 1)));
+}
+void ESP32PWM::write(uint32_t duty) {
+	myDuty = duty;
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+	ledcWrite(getPin(), duty);
+#else
+	ledcWrite(getChannel(), duty);
+#endif
+#else
+	ledcWrite(getChannel(), duty);
+#endif
+}
+void ESP32PWM::adjustFrequencyLocal(double freq, double dutyScaled) {
+	timerFreqSet[getTimer()] = (long) freq;
+	myFreq = freq;
+	if (attached()) {
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+		ledcDetach(pin);
+		// Remove the PWM during frequency adjust
+		_ledcSetupTimerFreq(getPin(), freq, resolutionBits, getChannel());
+		writeScaled(dutyScaled);
+		ledcAttachChannel(getPin(), freq, resolutionBits, getChannel()); // re-attach the pin after frequency adjust
+#else
+		ledcDetachPin(pin);
+		// Remove the PWM during frequency adjust
+		_ledcSetupTimerFreq(getPin(), freq, resolutionBits, getChannel());
+		writeScaled(dutyScaled);
+		ledcAttachPin(pin, getChannel()); // re-attach the pin after frequency adjust
+#endif
+#else
+		ledcDetachPin(pin);
+		// Remove the PWM during frequency adjust
+		_ledcSetupTimerFreq(getPin(), freq, resolutionBits, getChannel());
+		writeScaled(dutyScaled);
+		ledcAttachPin(pin, getChannel()); // re-attach the pin after frequency adjust
+#endif
+
+	} else {
+		_ledcSetupTimerFreq(getPin(), freq, resolutionBits, getChannel());
+		writeScaled(dutyScaled);
+	}
+}
+void ESP32PWM::adjustFrequency(double freq, double dutyScaled) {
+	if(dutyScaled<0)
+		dutyScaled=getDutyScaled();
+	writeScaled(dutyScaled);
+	for (int i = 0; i < timerCount[getTimer()]; i++) {
+		int pwm = timerAndIndexToChannel(getTimer(), i);
+		if (ChannelUsed[pwm] != NULL) {
+			if (ChannelUsed[pwm]->myFreq != freq) {
+				ChannelUsed[pwm]->adjustFrequencyLocal(freq,
+						ChannelUsed[pwm]->getDutyScaled());
+			}
+		}
+	}
+}
+double ESP32PWM::writeTone(double freq) {
+	for (int i = 0; i < timerCount[getTimer()]; i++) {
+		int pwm = timerAndIndexToChannel(getTimer(), i);
+		if (ChannelUsed[pwm] != NULL) {
+			if (ChannelUsed[pwm]->myFreq != freq) {
+				ChannelUsed[pwm]->adjustFrequencyLocal(freq,
+						ChannelUsed[pwm]->getDutyScaled());
+			}
+			write(1 << (resolutionBits-1)); // writeScaled(0.5);
+		}
+	}
+
+	return 0;
+}
+double ESP32PWM::writeNote(note_t note, uint8_t octave) {
+	const uint16_t noteFrequencyBase[12] = {
+			//   C        C#       D        Eb       E        F       F#        G       G#        A       Bb        B
+			4186, 4435, 4699, 4978, 5274, 5588, 5920, 6272, 6645, 7040, 7459,
+			7902 };
+
+	if (octave > 8 || note >= NOTE_MAX) {
+		return 0;
+	}
+	double noteFreq = (double) noteFrequencyBase[note]
+			/ (double) (1 << (8 - octave));
+	return writeTone(noteFreq);
+}
+uint32_t ESP32PWM::read() {
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+	return ledcRead(getPin());
+#else
+	return ledcRead(getChannel());
+#endif
+#else
+	return ledcRead(getChannel());
+#endif
+
+}
+double ESP32PWM::readFreq() {
+	return myFreq;
+}
+void ESP32PWM::attach(int p) {
+	pin = p;
+	attachedState = true;
+}
+void ESP32PWM::attachPin(uint8_t pin) {
+
+	if (hasPwm(pin)) {
+		attach(pin);
+		bool success=true;
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+		success=ledcAttachChannel(pin, readFreq(), resolutionBits, getChannel());
+#else
+		ledcAttachPin(pin, getChannel());
+#endif
+#else
+		ledcAttachPin(pin, getChannel());
+#endif
+		if(success)
+			return;
+		ESP_LOGE(TAG, "ERROR PWM channel failed to configure on pin %d!", pin);
+		return;
+	}
+		
+#if defined(CONFIG_IDF_TARGET_ESP32S2)
+						ESP_LOGE(TAG, "ERROR PWM channel unavailable on pin requested! %d PWM available on: 1-21,26,33-42",pin);
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+						ESP_LOGE(TAG, "ERROR PWM channel unavailable on pin requested! %d PWM available on: 1-21,35-45,47-48",pin);
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+						ESP_LOGE(TAG, "ERROR PWM channel unavailable on pin requested! %d PWM available on: 1-10,18-21",pin);
+#else
+						ESP_LOGE(TAG, "ERROR PWM channel unavailable on pin requested! %d PWM available on: 2,4,5,12-19,21-23,25-27,32-33",pin);
+#endif
+
+}
+void ESP32PWM::attachPin(uint8_t pin, double freq, uint8_t resolution_bits) {
+
+	if (hasPwm(pin)){
+        this->pin = pin;
+		int ret=setup(freq, resolution_bits);
+		ESP_LOGI(TAG, "Pin Setup %d with code %d",pin,ret);
+	  attachPin(pin);
+	}
+	else
+		ESP_LOGE(TAG, "ERROR Pin Failed %d ",pin);
+}
+void ESP32PWM::detachPin(int pin) {
+#ifdef ESP_ARDUINO_VERSION_MAJOR
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+
+	ledcDetach(pin);
+#else
+	ledcDetachPin(pin);
+#endif
+#else
+	ledcDetachPin(pin);
+#endif
+	deallocate();
+}
+/* Side effects of frequency changes happen because of shared timers
+ *
+ * LEDC Chan to Group/Channel/Timer Mapping
+ ** ledc: 0  => Group: 0, Channel: 0, Timer: 0
+ ** ledc: 1  => Group: 0, Channel: 1, Timer: 0
+ ** ledc: 2  => Group: 0, Channel: 2, Timer: 1
+ ** ledc: 3  => Group: 0, Channel: 3, Timer: 1
+ ** ledc: 4  => Group: 0, Channel: 4, Timer: 2
+ ** ledc: 5  => Group: 0, Channel: 5, Timer: 2
+ ** ledc: 6  => Group: 0, Channel: 6, Timer: 3
+ ** ledc: 7  => Group: 0, Channel: 7, Timer: 3
+ ** ledc: 8  => Group: 1, Channel: 0, Timer: 0
+ ** ledc: 9  => Group: 1, Channel: 1, Timer: 0
+ ** ledc: 10 => Group: 1, Channel: 2, Timer: 1
+ ** ledc: 11 => Group: 1, Channel: 3, Timer: 1
+ ** ledc: 12 => Group: 1, Channel: 4, Timer: 2
+ ** ledc: 13 => Group: 1, Channel: 5, Timer: 2
+ ** ledc: 14 => Group: 1, Channel: 6, Timer: 3
+ ** ledc: 15 => Group: 1, Channel: 7, Timer: 3
+ */
+
+bool ESP32PWM::checkFrequencyForSideEffects(double freq) {
+
+	allocatenext(freq);
+	for (int i = 0; i < timerCount[getTimer()]; i++) {
+		int pwm = timerAndIndexToChannel(getTimer(), i);
+
+		if (pwm == pwmChannel)
+			continue;
+		if (ChannelUsed[pwm] != NULL)
+			if (ChannelUsed[pwm]->getTimer() == getTimer()) {
+				double diff = abs(ChannelUsed[pwm]->myFreq - freq);
+				if (abs(diff) > 0.1) {
+					ESP_LOGW(TAG, 
+							"\tWARNING PWM channel %d	\
+							 shares a timer with channel %d\n	\
+							\tchanging the frequency to %.3f		\
+							Hz will ALSO change channel %d	\
+							\n\tfrom its previous frequency of %.3f Hz\n "
+								,pwmChannel, pwm, freq, pwm, ChannelUsed[pwm]->myFreq);
+					ChannelUsed[pwm]->myFreq = freq;
+				}
+			}
+	}
+	return true;
+}
+
+ESP32PWM* pwmFactory(int pin) {
+	for (int i = 0; i < NUM_PWM; i++)
+		if (ESP32PWM::ChannelUsed[i] != NULL) {
+			if (ESP32PWM::ChannelUsed[i]->getPin() == pin)
+				return ESP32PWM::ChannelUsed[i];
+		}
+	return NULL;
+}
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\src\ESP32PWM.cpp
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\src\ESP32Servo.cpp
+========================================
+/*
+Copyright (c) 2017 John K. Bennett. All right reserved.
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+* Notes on the implementation:
+* The ESP32 supports 16 hardware LED PWM channels that are intended
+* to be used for LED brightness control. The low level ESP32 code
+* (esp32-hal-ledc.*) allows us to set the PWM frequency and bit-depth,
+* and then manipulate them by setting bits in the relevant control
+* registers.
+*
+* Different servos require different pulse widths to vary servo angle, but the range is
+* an approximately 500-2500 microsecond pulse every 20ms (50Hz). In general, hobbyist servos
+* sweep 180 degrees, so the lowest number in the published range for a particular servo
+* represents an angle of 0 degrees, the middle of the range represents 90 degrees, and the top
+* of the range represents 180 degrees. So for example, if the range is 1000us to 2000us,
+* 1000us would equal an angle of 0, 1500us would equal 90 degrees, and 2000us would equal 180
+* degrees. We vary pulse width (recall that the pulse period is already set to 20ms) as follows:
+*
+* The ESP32 PWM timers allow us to set the timer width (max 20 bits). Thus
+* the timer "tick" length is (pulse_period/2**timer_width), and the equation for pulse_high_width
+* (the portion of the 20ms cycle that the signal is high) becomes:
+*
+*                  pulse_high_width  = count * tick_length
+*                                    = count * (pulse_period/2**timer_width)
+*
+*            and   count = (pulse_high_width / (pulse_period/2**timer_width))
+*
+* So, for example, if I want a 1500us pulse_high_width, I set pulse_period to 20ms (20000us)
+* (this value is set in the ledcSetup call), and count (used in the ledcWrite call) to
+* 1500/(20000/65536), or 4924. This is the value we write to the timer in the ledcWrite call.
+* If we increase the timer_width, the timer_count values need to be adjusted.
+*
+* The servo signal pins connect to any available GPIO pins on the ESP32, but not all pins are
+* GPIO pins.
+*
+* The ESP32 is a 32 bit processor that includes FP support; this code reflects that fact.
+*/
+
+#include <ESP32Servo.h>
+#if defined(ARDUINO)
+	#include "Arduino.h"
+#endif
+
+static const char* TAG = "ESP32Servo";
+
+Servo::Servo()
+{		// initialize this channel with plausible values, except pin # (we set pin # when attached)
+	REFRESH_CPS = 50;
+	this->ticks = DEFAULT_PULSE_WIDTH_TICKS;
+	this->timer_width = DEFAULT_TIMER_WIDTH;
+	this->pinNumber = -1;     // make it clear that we haven't attached a pin to this channel
+	this->min = DEFAULT_uS_LOW;
+	this->max = DEFAULT_uS_HIGH;
+	this->timer_width_ticks = pow(2,this->timer_width);
+
+}
+ESP32PWM * Servo::getPwm(){
+
+	return &pwm;
+}
+
+int Servo::attach(int pin)
+{
+
+    return (this->attach(pin, DEFAULT_uS_LOW, DEFAULT_uS_HIGH));
+}
+
+int Servo::attach(int pin, int min, int max)
+{
+    ESP_LOGW(TAG, "Attempting to Attach servo on pin=%d min=%d max=%d",pin,min,max);
+
+#ifdef ENFORCE_PINS
+        // ESP32 Recommend only the following pins 2,4,12-19,21-23,25-27,32-33
+		// ESP32-S2 only the following pins 1-21,26,33-42
+        if (pwm.hasPwm(pin))
+        {
+#endif
+
+            // OK to proceed; first check for new/reuse
+            if (this->pinNumber < 0) // we are attaching to a new or previously detached pin; we need to initialize/reinitialize
+            {
+                this->ticks = DEFAULT_PULSE_WIDTH_TICKS;
+                this->timer_width = DEFAULT_TIMER_WIDTH;
+                this->timer_width_ticks = pow(2,this->timer_width);
+            }
+            this->pinNumber = pin;
+#ifdef ENFORCE_PINS
+        }
+        else
+        {
+#ifdef __XTENSA_esp32s3__
+if(
+#endif
+
+#if defined(CONFIG_IDF_TARGET_ESP32S2)
+				ESP_LOGE(TAG, "This pin can not be a servo: %d Servo available on: 1-21,26,33-42", pin);
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+			    ESP_LOGE(TAG, "This pin can not be a servo: %d Servo available on: 1-21,35-45,47-48", pin);
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+				ESP_LOGE(TAG, "This pin can not be a servo: %d Servo available on: 1-10,18-21", pin);
+#else
+				ESP_LOGE(TAG, "This pin can not be a servo: %d Servo available on: 2,4,5,12-19,21-23,25-27,32-33",pin);
+#endif
+            return 0;
+        }
+#endif
+
+
+        // min/max checks 
+        if (min < MIN_PULSE_WIDTH)          // ensure pulse width is valid
+            min = MIN_PULSE_WIDTH;
+        if (max > MAX_PULSE_WIDTH)
+            max = MAX_PULSE_WIDTH;
+        this->min = min;     //store this value in uS
+        this->max = max;    //store this value in uS
+        // Set up this channel
+        // if you want anything other than default timer width, you must call setTimerWidth() before attach
+
+        pwm.attachPin(this->pinNumber,REFRESH_CPS, this->timer_width );   // GPIO pin assigned to channel
+        ESP_LOGW(TAG, "Success to Attach servo : %d on PWM %d",pin,pwm.getChannel());
+
+        return pwm.getChannel();
+}
+
+void Servo::detach()
+{
+    if (this->attached())
+    {
+        //keep track of detached servos channels so we can reuse them if needed
+        pwm.detachPin(this->pinNumber);
+
+        this->pinNumber = -1;
+    }
+}
+
+void Servo::write(int value)
+{
+    // treat values less than MIN_PULSE_WIDTH (500) as angles in degrees (valid values in microseconds are handled as microseconds)
+    if (value < MIN_PULSE_WIDTH)
+    {
+        if (value < 0)
+            value = 0;
+        else if (value > 180)
+            value = 180;
+
+        value = map(value, 0, 180, this->min, this->max);
+    }
+    this->writeMicroseconds(value);
+}
+
+void Servo::writeMicroseconds(int value)
+{
+    writeTicks(usToTicks(value));  // convert to ticks
+}
+
+void Servo::writeTicks(int value)
+{
+    // calculate and store the values for the given channel
+    if (this->attached())   // ensure channel is valid
+    {
+        if (value < usToTicks(this->min))      // ensure ticks are in range
+            value = usToTicks(this->min);
+        else if (value > usToTicks(this->max))
+            value = usToTicks(this->max);
+        this->ticks = value;
+        // do the actual write
+        pwm.write( this->ticks);
+    }
+}
+
+void Servo::release()
+{
+    if (this->attached())   // ensure channel is valid
+        pwm.write(0);
+}
+
+int Servo::read() // return the value as degrees
+{
+    return (map(readMicroseconds(), this->min, this->max, 0, 180));
+}
+
+int Servo::readMicroseconds()
+{
+    int pulsewidthUsec;
+    if (this->attached())
+    { 
+        pulsewidthUsec = ticksToUs(this->ticks);
+    }
+    else
+    {
+        pulsewidthUsec = 0;
+    }
+
+    return (pulsewidthUsec);
+}
+
+int Servo::readTicks()
+{
+    return this->ticks;
+}
+
+bool Servo::attached()
+{
+    return (pwm.attached());
+}
+
+void Servo::setTimerWidth(int value)
+{
+    // only allow values between 10 and 14 for ESP32-C3
+    // only allow values between 16 and 20 for other ESP32
+    if (value < MINIMUM_TIMER_WIDTH )
+        value = MINIMUM_TIMER_WIDTH;
+    else if (value > MAXIMUM_TIMER_WIDTH)
+        value = MAXIMUM_TIMER_WIDTH;
+        
+    // Fix the current ticks value after timer width change
+    // The user can reset the tick value with a write() or writeUs()
+    int widthDifference = this->timer_width - value;
+    // if positive multiply by diff; if neg, divide
+    if (widthDifference > 0)
+    {
+        this->ticks = widthDifference * this->ticks;
+    }
+    else if (widthDifference < 0)
+    {
+        this->ticks = this->ticks/-widthDifference;
+    }
+    
+    this->timer_width = value;
+    this->timer_width_ticks = pow(2,this->timer_width);
+    
+    // If this is an attached servo, clean up
+    if (this->attached())
+    {
+        // detach, setup and attach again to reflect new timer width
+    	pwm.detachPin(this->pinNumber);
+    	pwm.attachPin(this->pinNumber, REFRESH_CPS, this->timer_width);
+    }        
+}
+
+int Servo::readTimerWidth()
+{
+    return (this->timer_width);
+}
+
+int Servo::usToTicks(int usec)
+{
+    return (int)((double)usec / ((double)REFRESH_USEC / (double)this->timer_width_ticks)*(((double)REFRESH_CPS)/50.0));
+}
+
+int Servo::ticksToUs(int ticks)
+{
+    return (int)((double)ticks * ((double)REFRESH_USEC / (double)this->timer_width_ticks)/(((double)REFRESH_CPS)/50.0));
+}
+
+ 
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\ESP32Servo\src\ESP32Servo.cpp
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\PubSubClient\CHANGES.txt
+========================================
+2.8
+   * Add setBufferSize() to override MQTT_MAX_PACKET_SIZE
+   * Add setKeepAlive() to override MQTT_KEEPALIVE
+   * Add setSocketTimeout() to overide MQTT_SOCKET_TIMEOUT
+   * Added check to prevent subscribe/unsubscribe to empty topics
+   * Declare wifi mode prior to connect in ESP example
+   * Use `strnlen` to avoid overruns
+   * Support pre-connected Client objects
+
+2.7
+   * Fix remaining-length handling to prevent buffer overrun
+   * Add large-payload API - beginPublish/write/publish/endPublish
+   * Add yield call to improve reliability on ESP
+   * Add Clean Session flag to connect options
+   * Add ESP32 support for functional callback signature
+   * Various other fixes
+
+2.4
+   * Add MQTT_SOCKET_TIMEOUT to prevent it blocking indefinitely
+     whilst waiting for inbound data
+   * Fixed return code when publishing >256 bytes
+
+2.3
+   * Add publish(topic,payload,retained) function
+
+2.2
+   * Change code layout to match Arduino Library reqs
+
+2.1
+   * Add MAX_TRANSFER_SIZE def to chunk messages if needed
+   * Reject topic/payloads that exceed MQTT_MAX_PACKET_SIZE
+
+2.0
+   * Add (and default to) MQTT 3.1.1 support
+   * Fix PROGMEM handling for Intel Galileo/ESP8266
+   * Add overloaded constructors for convenience
+   * Add chainable setters for server/callback/client/stream
+   * Add state function to return connack return code
+
+1.9
+   * Do not split MQTT packets over multiple calls to _client->write()
+   * API change: All constructors now require an instance of Client
+      to be passed in.
+   * Fixed example to match 1.8 api changes - dpslwk
+   * Added username/password support - WilHall
+   * Added publish_P - publishes messages from PROGMEM - jobytaffey
+
+1.8
+    * KeepAlive interval is configurable in PubSubClient.h
+    * Maximum packet size is configurable in PubSubClient.h
+    * API change: Return boolean rather than int from various functions
+    * API change: Length parameter in message callback changed
+       from int to unsigned int
+    * Various internal tidy-ups around types
+1.7
+    * Improved keepalive handling
+    * Updated to the Arduino-1.0 API
+1.6
+    * Added the ability to publish a retained message
+
+1.5
+    * Added default constructor
+    * Fixed compile error when used with arduino-0021 or later
+
+1.4
+    * Fixed connection lost handling
+
+1.3
+    * Fixed packet reading bug in PubSubClient.readPacket
+
+1.2
+    * Fixed compile error when used with arduino-0016 or later
+
+
+1.1
+    * Reduced size of library
+    * Added support for Will messages
+    * Clarified licensing - see LICENSE.txt
+
+
+1.0
+    * Only Quality of Service (QOS) 0 messaging is supported
+    * The maximum message size, including header, is 128 bytes
+    * The keepalive interval is set to 30 seconds
+    * No support for Will messages
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\PubSubClient\CHANGES.txt
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\PubSubClient\keywords.txt
+========================================
+#######################################
+# Syntax Coloring Map For PubSubClient
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+PubSubClient	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+connect 	KEYWORD2
+disconnect 	KEYWORD2
+publish 	KEYWORD2
+publish_P 	KEYWORD2
+beginPublish 	KEYWORD2
+endPublish 	KEYWORD2
+write	 	KEYWORD2
+subscribe 	KEYWORD2
+unsubscribe 	KEYWORD2
+loop 	KEYWORD2
+connected 	KEYWORD2
+setServer	KEYWORD2
+setCallback	KEYWORD2
+setClient	KEYWORD2
+setStream	KEYWORD2
+setKeepAlive 	KEYWORD2
+setBufferSize 	KEYWORD2
+setSocketTimeout 	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\PubSubClient\keywords.txt
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\PubSubClient\library.json
+========================================
+{
+    "name": "PubSubClient",
+    "keywords": "ethernet, mqtt, m2m, iot",
+    "description": "A client library for MQTT messaging. MQTT is a lightweight messaging protocol ideal for small devices. This library allows you to send and receive MQTT messages. It supports the latest MQTT 3.1.1 protocol and can be configured to use the older MQTT 3.1 if needed. It supports all Arduino Ethernet Client compatible hardware, including the Intel Galileo/Edison, ESP8266 and TI CC3000.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/knolleary/pubsubclient.git"
+    },
+    "version": "2.8",
+    "exclude": "tests",
+    "examples": "examples/*/*.ino",
+    "frameworks": "arduino",
+    "platforms": [
+        "atmelavr",
+        "espressif8266",
+        "espressif32"
+    ]
+}
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\PubSubClient\library.json
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\PubSubClient\LICENSE.txt
+========================================
+Copyright (c) 2008-2020 Nicholas O'Leary
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\PubSubClient\LICENSE.txt
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\PubSubClient\README.md
+========================================
+# Arduino Client for MQTT
+
+This library provides a client for doing simple publish/subscribe messaging with
+a server that supports MQTT.
+
+## Examples
+
+The library comes with a number of example sketches. See File > Examples > PubSubClient
+within the Arduino application.
+
+Full API documentation is available here: https://pubsubclient.knolleary.net
+
+## Limitations
+
+ - It can only publish QoS 0 messages. It can subscribe at QoS 0 or QoS 1.
+ - The maximum message size, including header, is **256 bytes** by default. This
+   is configurable via `MQTT_MAX_PACKET_SIZE` in `PubSubClient.h` or can be changed
+   by calling `PubSubClient::setBufferSize(size)`.
+ - The keepalive interval is set to 15 seconds by default. This is configurable
+   via `MQTT_KEEPALIVE` in `PubSubClient.h` or can be changed by calling
+   `PubSubClient::setKeepAlive(keepAlive)`.
+ - The client uses MQTT 3.1.1 by default. It can be changed to use MQTT 3.1 by
+   changing value of `MQTT_VERSION` in `PubSubClient.h`.
+
+
+## Compatible Hardware
+
+The library uses the Arduino Ethernet Client api for interacting with the
+underlying network hardware. This means it Just Works with a growing number of
+boards and shields, including:
+
+ - Arduino Ethernet
+ - Arduino Ethernet Shield
+ - Arduino YUN – use the included `YunClient` in place of `EthernetClient`, and
+   be sure to do a `Bridge.begin()` first
+ - Arduino WiFi Shield - if you want to send packets > 90 bytes with this shield,
+   enable the `MQTT_MAX_TRANSFER_SIZE` define in `PubSubClient.h`.
+ - Sparkfun WiFly Shield – [library](https://github.com/dpslwk/WiFly)
+ - TI CC3000 WiFi - [library](https://github.com/sparkfun/SFE_CC3000_Library)
+ - Intel Galileo/Edison
+ - ESP8266
+ - ESP32
+
+The library cannot currently be used with hardware based on the ENC28J60 chip –
+such as the Nanode or the Nuelectronics Ethernet Shield. For those, there is an
+[alternative library](https://github.com/njh/NanodeMQTT) available.
+
+## License
+
+This code is released under the MIT License.
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\PubSubClient\README.md
+
+========================================
+FILE START: .\esp32\.pio\libdeps\esp32dev\PubSubClient\src\PubSubClient.cpp
+========================================
+/*
+
+  PubSubClient.cpp - A simple client for MQTT.
+  Nick O'Leary
+  http://knolleary.net
+*/
+
+#include "PubSubClient.h"
+#include "Arduino.h"
+
+PubSubClient::PubSubClient() {
+    this->_state = MQTT_DISCONNECTED;
+    this->_client = NULL;
+    this->stream = NULL;
+    setCallback(NULL);
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+
+PubSubClient::PubSubClient(Client& client) {
+    this->_state = MQTT_DISCONNECTED;
+    setClient(client);
+    this->stream = NULL;
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(addr, port);
+    setClient(client);
+    this->stream = NULL;
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(addr,port);
+    setClient(client);
+    setStream(stream);
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(addr, port);
+    setCallback(callback);
+    setClient(client);
+    this->stream = NULL;
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(addr,port);
+    setCallback(callback);
+    setClient(client);
+    setStream(stream);
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(ip, port);
+    setClient(client);
+    this->stream = NULL;
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(ip,port);
+    setClient(client);
+    setStream(stream);
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(ip, port);
+    setCallback(callback);
+    setClient(client);
+    this->stream = NULL;
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(ip,port);
+    setCallback(callback);
+    setClient(client);
+    setStream(stream);
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+
+PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(domain,port);
+    setClient(client);
+    this->stream = NULL;
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, Stream& stream) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(domain,port);
+    setClient(client);
+    setStream(stream);
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(domain,port);
+    setCallback(callback);
+    setClient(client);
+    this->stream = NULL;
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+    this->_state = MQTT_DISCONNECTED;
+    setServer(domain,port);
+    setCallback(callback);
+    setClient(client);
+    setStream(stream);
+    this->bufferSize = 0;
+    setBufferSize(MQTT_MAX_PACKET_SIZE);
+    setKeepAlive(MQTT_KEEPALIVE);
+    setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+}
+
+PubSubClient::~PubSubClient() {
+  free(this->buffer);
+}
+
+boolean PubSubClient::connect(const char *id) {
+    return connect(id,NULL,NULL,0,0,0,0,1);
+}
+
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
+    return connect(id,user,pass,0,0,0,0,1);
+}
+
+boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,1);
+}
+
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+    return connect(id,user,pass,willTopic,willQos,willRetain,willMessage,1);
+}
+
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession) {
+    if (!connected()) {
+        int result = 0;
+
+
+        if(_client->connected()) {
+            result = 1;
+        } else {
+            if (domain != NULL) {
+                result = _client->connect(this->domain, this->port);
+            } else {
+                result = _client->connect(this->ip, this->port);
+            }
+        }
+
+        if (result == 1) {
+            nextMsgId = 1;
+            // Leave room in the buffer for header and variable length field
+            uint16_t length = MQTT_MAX_HEADER_SIZE;
+            unsigned int j;
+
+#if MQTT_VERSION == MQTT_VERSION_3_1
+            uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p', MQTT_VERSION};
+#define MQTT_HEADER_VERSION_LENGTH 9
+#elif MQTT_VERSION == MQTT_VERSION_3_1_1
+            uint8_t d[7] = {0x00,0x04,'M','Q','T','T',MQTT_VERSION};
+#define MQTT_HEADER_VERSION_LENGTH 7
+#endif
+            for (j = 0;j<MQTT_HEADER_VERSION_LENGTH;j++) {
+                this->buffer[length++] = d[j];
+            }
+
+            uint8_t v;
+            if (willTopic) {
+                v = 0x04|(willQos<<3)|(willRetain<<5);
+            } else {
+                v = 0x00;
+            }
+            if (cleanSession) {
+                v = v|0x02;
+            }
+
+            if(user != NULL) {
+                v = v|0x80;
+
+                if(pass != NULL) {
+                    v = v|(0x80>>1);
+                }
+            }
+            this->buffer[length++] = v;
+
+            this->buffer[length++] = ((this->keepAlive) >> 8);
+            this->buffer[length++] = ((this->keepAlive) & 0xFF);
+
+            CHECK_STRING_LENGTH(length,id)
+            length = writeString(id,this->buffer,length);
+            if (willTopic) {
+                CHECK_STRING_LENGTH(length,willTopic)
+                length = writeString(willTopic,this->buffer,length);
+                CHECK_STRING_LENGTH(length,willMessage)
+                length = writeString(willMessage,this->buffer,length);
+            }
+
+            if(user != NULL) {
+                CHECK_STRING_LENGTH(length,user)
+                length = writeString(user,this->buffer,length);
+                if(pass != NULL) {
+                    CHECK_STRING_LENGTH(length,pass)
+                    length = writeString(pass,this->buffer,length);
+                }
+            }
+
+            write(MQTTCONNECT,this->buffer,length-MQTT_MAX_HEADER_SIZE);
+
+            lastInActivity = lastOutActivity = millis();
+
+            while (!_client->available()) {
+                unsigned long t = millis();
+                if (t-lastInActivity >= ((int32_t) this->socketTimeout*1000UL)) {
+                    _state = MQTT_CONNECTION_TIMEOUT;
+                    _client->stop();
+                    return false;
+                }
+            }
+            uint8_t llen;
+            uint32_t len = readPacket(&llen);
+
+            if (len == 4) {
+                if (buffer[3] == 0) {
+                    lastInActivity = millis();
+                    pingOutstanding = false;
+                    _state = MQTT_CONNECTED;
+                    return true;
+                } else {
+                    _state = buffer[3];
+                }
+            }
+            _client->stop();
+        } else {
+            _state = MQTT_CONNECT_FAILED;
+        }
+        return false;
+    }
+    return true;
+}
+
+// reads a byte into result
+boolean PubSubClient::readByte(uint8_t * result) {
+   uint32_t previousMillis = millis();
+   while(!_client->available()) {
+     yield();
+     uint32_t currentMillis = millis();
+     if(currentMillis - previousMillis >= ((int32_t) this->socketTimeout * 1000)){
+       return false;
+     }
+   }
+   *result = _client->read();
+   return true;
+}
+
+// reads a byte into result[*index] and increments index
+boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
+  uint16_t current_index = *index;
+  uint8_t * write_address = &(result[current_index]);
+  if(readByte(write_address)){
+    *index = current_index + 1;
+    return true;
+  }
+  return false;
+}
+
+uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
+    uint16_t len = 0;
+    if(!readByte(this->buffer, &len)) return 0;
+    bool isPublish = (this->buffer[0]&0xF0) == MQTTPUBLISH;
+    uint32_t multiplier = 1;
+    uint32_t length = 0;
+    uint8_t digit = 0;
+    uint16_t skip = 0;
+    uint32_t start = 0;
+
+    do {
+        if (len == 5) {
+            // Invalid remaining length encoding - kill the connection
+            _state = MQTT_DISCONNECTED;
+            _client->stop();
+            return 0;
+        }
+        if(!readByte(&digit)) return 0;
+        this->buffer[len++] = digit;
+        length += (digit & 127) * multiplier;
+        multiplier <<=7; //multiplier *= 128
+    } while ((digit & 128) != 0);
+    *lengthLength = len-1;
+
+    if (isPublish) {
+        // Read in topic length to calculate bytes to skip over for Stream writing
+        if(!readByte(this->buffer, &len)) return 0;
+        if(!readByte(this->buffer, &len)) return 0;
+        skip = (this->buffer[*lengthLength+1]<<8)+this->buffer[*lengthLength+2];
+        start = 2;
+        if (this->buffer[0]&MQTTQOS1) {
+            // skip message id
+            skip += 2;
+        }
+    }
+    uint32_t idx = len;
+
+    for (uint32_t i = start;i<length;i++) {
+        if(!readByte(&digit)) return 0;
+        if (this->stream) {
+            if (isPublish && idx-*lengthLength-2>skip) {
+                this->stream->write(digit);
+            }
+        }
+
+        if (len < this->bufferSize) {
+            this->buffer[len] = digit;
+            len++;
+        }
+        idx++;
+    }
+
+    if (!this->stream && idx > this->bufferSize) {
+        len = 0; // This will cause the packet to be ignored.
+    }
+    return len;
+}
+
+boolean PubSubClient::loop() {
+    if (connected()) {
+        unsigned long t = millis();
+        if ((t - lastInActivity > this->keepAlive*1000UL) || (t - lastOutActivity > this->keepAlive*1000UL)) {
+            if (pingOutstanding) {
+                this->_state = MQTT_CONNECTION_TIMEOUT;
+                _client->stop();
+                return false;
+            } else {
+                this->buffer[0] = MQTTPINGREQ;
+                this->buffer[1] = 0;
+                _client->write(this->buffer,2);
+                lastOutActivity = t;
+                lastInActivity = t;
+                pingOutstanding = true;
+            }
+        }
+        if (_client->available()) {
+            uint8_t llen;
+            uint16_t len = readPacket(&llen);
+            uint16_t msgId = 0;
+            uint8_t *payload;
+            if (len > 0) {
+                lastInActivity = t;
+                uint8_t type = this->buffer[0]&0xF0;
+                if (type == MQTTPUBLISH) {
+                    if (callback) {
+                        uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
+                        memmove(this->buffer+llen+2,this->buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
+                        this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
+                        char *topic = (char*) this->buffer+llen+2;
+                        // msgId only present for QOS>0
+                        if ((this->buffer[0]&0x06) == MQTTQOS1) {
+                            msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
+                            payload = this->buffer+llen+3+tl+2;
+                            callback(topic,payload,len-llen-3-tl-2);
+
+                            this->buffer[0] = MQTTPUBACK;
+                            this->buffer[1] = 2;
+                            this->buffer[2] = (msgId >> 8);
+                            this->buffer[3] = (msgId & 0xFF);
+                            _client->write(this->buffer,4);
+                            lastOutActivity = t;
+
+                        } else {
+                            payload = this->buffer+llen+3+tl;
+                            callback(topic,payload,len-llen-3-tl);
+                        }
+                    }
+                } else if (type == MQTTPINGREQ) {
+                    this->buffer[0] = MQTTPINGRESP;
+                    this->buffer[1] = 0;
+                    _client->write(this->buffer,2);
+                } else if (type == MQTTPINGRESP) {
+                    pingOutstanding = false;
+                }
+            } else if (!connected()) {
+                // readPacket has closed the connection
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+boolean PubSubClient::publish(const char* topic, const char* payload) {
+    return publish(topic,(const uint8_t*)payload, payload ? strnlen(payload, this->bufferSize) : 0,false);
+}
+
+boolean PubSubClient::publish(const char* topic, const char* payload, boolean retained) {
+    return publish(topic,(const uint8_t*)payload, payload ? strnlen(payload, this->bufferSize) : 0,retained);
+}
+
+boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength) {
+    return publish(topic, payload, plength, false);
+}
+
+boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
+    if (connected()) {
+        if (this->bufferSize < MQTT_MAX_HEADER_SIZE + 2+strnlen(topic, this->bufferSize) + plength) {
+            // Too long
+            return false;
+        }
+        // Leave room in the buffer for header and variable length field
+        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        length = writeString(topic,this->buffer,length);
+
+        // Add payload
+        uint16_t i;
+        for (i=0;i<plength;i++) {
+            this->buffer[length++] = payload[i];
+        }
+
+        // Write the header
+        uint8_t header = MQTTPUBLISH;
+        if (retained) {
+            header |= 1;
+        }
+        return write(header,this->buffer,length-MQTT_MAX_HEADER_SIZE);
+    }
+    return false;
+}
+
+boolean PubSubClient::publish_P(const char* topic, const char* payload, boolean retained) {
+    return publish_P(topic, (const uint8_t*)payload, payload ? strnlen(payload, this->bufferSize) : 0, retained);
+}
+
+boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
+    uint8_t llen = 0;
+    uint8_t digit;
+    unsigned int rc = 0;
+    uint16_t tlen;
+    unsigned int pos = 0;
+    unsigned int i;
+    uint8_t header;
+    unsigned int len;
+    int expectedLength;
+
+    if (!connected()) {
+        return false;
+    }
+
+    tlen = strnlen(topic, this->bufferSize);
+
+    header = MQTTPUBLISH;
+    if (retained) {
+        header |= 1;
+    }
+    this->buffer[pos++] = header;
+    len = plength + 2 + tlen;
+    do {
+        digit = len  & 127; //digit = len %128
+        len >>= 7; //len = len / 128
+        if (len > 0) {
+            digit |= 0x80;
+        }
+        this->buffer[pos++] = digit;
+        llen++;
+    } while(len>0);
+
+    pos = writeString(topic,this->buffer,pos);
+
+    rc += _client->write(this->buffer,pos);
+
+    for (i=0;i<plength;i++) {
+        rc += _client->write((char)pgm_read_byte_near(payload + i));
+    }
+
+    lastOutActivity = millis();
+
+    expectedLength = 1 + llen + 2 + tlen + plength;
+
+    return (rc == expectedLength);
+}
+
+boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, boolean retained) {
+    if (connected()) {
+        // Send the header and variable length field
+        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        length = writeString(topic,this->buffer,length);
+        uint8_t header = MQTTPUBLISH;
+        if (retained) {
+            header |= 1;
+        }
+        size_t hlen = buildHeader(header, this->buffer, plength+length-MQTT_MAX_HEADER_SIZE);
+        uint16_t rc = _client->write(this->buffer+(MQTT_MAX_HEADER_SIZE-hlen),length-(MQTT_MAX_HEADER_SIZE-hlen));
+        lastOutActivity = millis();
+        return (rc == (length-(MQTT_MAX_HEADER_SIZE-hlen)));
+    }
+    return false;
+}
+
+int PubSubClient::endPublish() {
+ return 1;
+}
+
+size_t PubSubClient::write(uint8_t data) {
+    lastOutActivity = millis();
+    return _client->write(data);
+}
+
+size_t PubSubClient::write(const uint8_t *buffer, size_t size) {
+    lastOutActivity = millis();
+    return _client->write(buffer,size);
+}
+
+size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) {
+    uint8_t lenBuf[4];
+    uint8_t llen = 0;
+    uint8_t digit;
+    uint8_t pos = 0;
+    uint16_t len = length;
+    do {
+
+        digit = len  & 127; //digit = len %128
+        len >>= 7; //len = len / 128
+        if (len > 0) {
+            digit |= 0x80;
+        }
+        lenBuf[pos++] = digit;
+        llen++;
+    } while(len>0);
+
+    buf[4-llen] = header;
+    for (int i=0;i<llen;i++) {
+        buf[MQTT_MAX_HEADER_SIZE-llen+i] = lenBuf[i];
+    }
+    return llen+1; // Full header size is variable length bit plus the 1-byte fixed header
+}
+
+boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
+    uint16_t rc;
+    uint8_t hlen = buildHeader(header, buf, length);
+
+#ifdef MQTT_MAX_TRANSFER_SIZE
+    uint8_t* writeBuf = buf+(MQTT_MAX_HEADER_SIZE-hlen);
+    uint16_t bytesRemaining = length+hlen;  //Match the length type
+    uint8_t bytesToWrite;
+    boolean result = true;
+    while((bytesRemaining > 0) && result) {
+        bytesToWrite = (bytesRemaining > MQTT_MAX_TRANSFER_SIZE)?MQTT_MAX_TRANSFER_SIZE:bytesRemaining;
+        rc = _client->write(writeBuf,bytesToWrite);
+        result = (rc == bytesToWrite);
+        bytesRemaining -= rc;
+        writeBuf += rc;
+    }
+    return result;
+#else
+    rc = _client->write(buf+(MQTT_MAX_HEADER_SIZE-hlen),length+hlen);
+    lastOutActivity = millis();
+    return (rc == hlen+length);
+#endif
+}
+
+boolean PubSubClient::subscribe(const char* topic) {
+    return subscribe(topic, 0);
+}
+
+boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
+    size_t topicLength = strnlen(topic, this->bufferSize);
+    if (topic == 0) {
+        return false;
+    }
+    if (qos > 1) {
+        return false;
+    }
+    if (this->bufferSize < 9 + topicLength) {
+        // Too long
+        return false;
+    }
+    if (connected()) {
+        // Leave room in the buffer for header and variable length field
+        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        nextMsgId++;
+        if (nextMsgId == 0) {
+            nextMsgId = 1;
+        }
+        this->buffer[length++] = (nextMsgId >> 8);
+        this->buffer[length++] = (nextMsgId & 0xFF);
+        length = writeString((char*)topic, this->buffer,length);
+        this->buffer[length++] = qos;
+        return write(MQTTSUBSCRIBE|MQTTQOS1,this->buffer,length-MQTT_MAX_HEADER_SIZE);
+    }
+    return false;
+}
+
+boolean PubSubClient::unsubscribe(const char* topic) {
+	size_t topicLength = strnlen(topic, this->bufferSize);
+    if (topic == 0) {
+        return false;
+    }
+    if (this->bufferSize < 9 + topicLength) {
+        // Too long
+        return false;
+    }
+    if (connected()) {
+        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        nextMsgId++;
+        if (nextMsgId == 0) {
+            nextMsgId = 1;
+        }
+        this->buffer[length++] = (nextMsgId >> 8);
+        this->buffer[length++] = (nextMsgId & 0xFF);
+        length = writeString(topic, this->buffer,length);
+        return write(MQTTUNSUBSCRIBE|MQTTQOS1,this->buffer,length-MQTT_MAX_HEADER_SIZE);
+    }
+    return false;
+}
+
+void PubSubClient::disconnect() {
+    this->buffer[0] = MQTTDISCONNECT;
+    this->buffer[1] = 0;
+    _client->write(this->buffer,2);
+    _state = MQTT_DISCONNECTED;
+    _client->flush();
+    _client->stop();
+    lastInActivity = lastOutActivity = millis();
+}
+
+uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
+    const char* idp = string;
+    uint16_t i = 0;
+    pos += 2;
+    while (*idp) {
+        buf[pos++] = *idp++;
+        i++;
+    }
+    buf[pos-i-2] = (i >> 8);
+    buf[pos-i-1] = (i & 0xFF);
+    return pos;
+}
+
+
+boolean PubSubClient::connected() {
+    boolean rc;
+    if (_client == NULL ) {
+        rc = false;
+    } else {
+        rc = (int)_client->connected();
+        if (!rc) {
+            if (this->_state == MQTT_CONNECTED) {
+                this->_state = MQTT_CONNECTION_LOST;
+                _client->flush();
+                _client->stop();
+            }
+        } else {
+            return this->_state == MQTT_CONNECTED;
+        }
+    }
+    return rc;
+}
+
+PubSubClient& PubSubClient::setServer(uint8_t * ip, uint16_t port) {
+    IPAddress addr(ip[0],ip[1],ip[2],ip[3]);
+    return setServer(addr,port);
+}
+
+PubSubClient& PubSubClient::setServer(IPAddress ip, uint16_t port) {
+    this->ip = ip;
+    this->port = port;
+    this->domain = NULL;
+    return *this;
+}
+
+PubSubClient& PubSubClient::setServer(const char * domain, uint16_t port) {
+    this->domain = domain;
+    this->port = port;
+    return *this;
+}
+
+PubSubClient& PubSubClient::setCallback(MQTT_CALLBACK_SIGNATURE) {
+    this->callback = callback;
+    return *this;
+}
+
+PubSubClient& PubSubClient::setClient(Client& client){
+    this->_client = &client;
+    return *this;
+}
+
+PubSubClient& PubSubClient::setStream(Stream& stream){
+    this->stream = &stream;
+    return *this;
+}
+
+int PubSubClient::state() {
+    return this->_state;
+}
+
+boolean PubSubClient::setBufferSize(uint16_t size) {
+    if (size == 0) {
+        // Cannot set it back to 0
+        return false;
+    }
+    if (this->bufferSize == 0) {
+        this->buffer = (uint8_t*)malloc(size);
+    } else {
+        uint8_t* newBuffer = (uint8_t*)realloc(this->buffer, size);
+        if (newBuffer != NULL) {
+            this->buffer = newBuffer;
+        } else {
+            return false;
+        }
+    }
+    this->bufferSize = size;
+    return (this->buffer != NULL);
+}
+
+uint16_t PubSubClient::getBufferSize() {
+    return this->bufferSize;
+}
+PubSubClient& PubSubClient::setKeepAlive(uint16_t keepAlive) {
+    this->keepAlive = keepAlive;
+    return *this;
+}
+PubSubClient& PubSubClient::setSocketTimeout(uint16_t timeout) {
+    this->socketTimeout = timeout;
+    return *this;
+}
+
+
+FILE END: .\esp32\.pio\libdeps\esp32dev\PubSubClient\src\PubSubClient.cpp
+
+========================================
+FILE START: .\esp32\src\main.cpp
+========================================
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <PubSubClient.h>
+#include <ESP32Servo.h>
+#include <BLEDevice.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
+#include "secrets.h"
+
+// ================= HARDWARE SETTINGS =================
+const int servoPin = 13;
+// Buzzer Pin Removed
+
+const int SERVO_MIN_US = 500;
+const int SERVO_MAX_US = 2500;
+
+// ================= TUNING PARAMETERS =================
+const unsigned long GATE_COOLDOWN_MS = 6000;
+const int BLE_SCAN_DURATION = 5; // Seconds
+const int RSSI_THRESHOLD = -85;
+
+// ================= GLOBAL OBJECTS =================
+Servo gateServo;
+WiFiClientSecure espClient;
+PubSubClient mqttClient(espClient);
+BLEScan *pBLEScan;
+
+// ================= STATE VARIABLES =================
+volatile bool triggerBleScan = false;
+volatile bool ownerFound = false;
+volatile bool bleStopNow = false;
+volatile bool gateIsMoving = false;
+
+unsigned long lastGateOpenTime = 0;
+unsigned long gateCloseTimer = 0;
+
+TaskHandle_t bleTaskHandle;
+
+// ================= BLE CALLBACK =================
+const BLEUUID OWNER_CHAR_UUID("2222");
+
+class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
+{
+  void onResult(BLEAdvertisedDevice device)
+  {
+    if (ownerFound)
+      return;
+
+    bool match =
+        (device.haveServiceUUID() && device.isAdvertisingService(OWNER_CHAR_UUID)) ||
+        (device.haveServiceData() && device.getServiceDataUUID().equals(OWNER_CHAR_UUID));
+
+    if (match)
+    {
+      int rssi = device.getRSSI();
+
+      if (rssi > RSSI_THRESHOLD)
+      {
+        Serial.printf("[BLE] Owner detected (RSSI %d)\n", rssi);
+        ownerFound = true;
+        bleStopNow = true;
+      }
+    }
+  }
+};
+
+// ================= BLE TASK =================
+void bleTask(void *parameter)
+{
+  Serial.println("[BLE TASK] Started");
+
+  BLEDevice::init("");
+  pBLEScan = BLEDevice::getScan();
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setActiveScan(true);
+  pBLEScan->setInterval(100);
+  pBLEScan->setWindow(80);
+
+  for (;;)
+  {
+    if (triggerBleScan)
+    {
+      Serial.println("[BLE TASK] Starting scan...");
+      ownerFound = false;
+      bleStopNow = false;
+
+      BLEScanResults results = pBLEScan->start(BLE_SCAN_DURATION, false);
+
+      if (bleStopNow)
+      {
+        Serial.println("[BLE TASK] Early stop");
+        pBLEScan->stop();
+      }
+
+      pBLEScan->clearResults();
+      triggerBleScan = false;
+
+      Serial.println("[BLE TASK] Scan completed");
+    }
+
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
+}
+
+// ================= SERVO HELPERS =================
+void setGate(int angle)
+{
+  gateServo.write(angle);
+}
+
+void notifyVisual()
+{
+  setGate(10);
+  delay(150);
+  setGate(0);
+}
+
+void triggerGateSequence(int angle, int durationMs)
+{
+  if (gateIsMoving)
+    return;
+
+  Serial.printf("[GATE] Moving to %d°\n", angle);
+  gateIsMoving = true;
+  setGate(angle);
+
+  gateCloseTimer = millis() + durationMs;
+  lastGateOpenTime = millis();
+}
+
+// ================= MQTT CALLBACK =================
+void mqttCallback(char *topic, byte *payload, unsigned int length)
+{
+  String msg;
+  for (unsigned int i = 0; i < length; i++)
+    msg += (char)payload[i];
+  Serial.printf("[MQTT] Message: %s\n", msg.c_str());
+
+  if (msg == "scan_person")
+  {
+    if (millis() - lastGateOpenTime > GATE_COOLDOWN_MS)
+    {
+      Serial.println("[MAIN] Starting BLE scan");
+      triggerBleScan = true;
+    }
+  }
+  else if (msg == "open_small")
+  {
+    if (millis() - lastGateOpenTime > GATE_COOLDOWN_MS)
+      triggerGateSequence(45, 900);
+  }
+  else if (msg == "open_big" || msg == "open_car")
+  {
+    if (millis() - lastGateOpenTime > GATE_COOLDOWN_MS)
+      triggerGateSequence(90, 1200);
+  }
+}
+
+// ================= MQTT CONNECT =================
+void connectToMqtt()
+{
+  while (!mqttClient.connected())
+  {
+    Serial.print("[MQTT] Connecting... ");
+
+    String clientId = "ESP32Gate-" + String(random(0xffff), HEX);
+
+    if (mqttClient.connect(clientId.c_str(), MQTT_USER, MQTT_PASS))
+    {
+      Serial.println("OK");
+      mqttClient.subscribe(MQTT_TOPIC);
+      notifyVisual();
+    }
+    else
+    {
+      Serial.printf("Fail (rc=%d). Retrying...\n", mqttClient.state());
+      delay(1500);
+    }
+  }
+}
+
+// ================= SETUP =================
+void setup()
+{
+  Serial.begin(115200);
+  delay(300);
+
+  gateServo.attach(servoPin, SERVO_MIN_US, SERVO_MAX_US);
+  gateServo.write(0);
+
+  // Buzzer Setup REMOVED
+
+  Serial.printf("[WiFi] Connecting to %s\n", WIFI_SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(300);
+  }
+  Serial.println("\n[WiFi] Connected!");
+
+  espClient.setInsecure();
+  espClient.setHandshakeTimeout(20);
+
+  mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
+  mqttClient.setCallback(mqttCallback);
+
+  xTaskCreatePinnedToCore(
+      bleTask,
+      "BLE_Task",
+      4096,
+      NULL,
+      1,
+      &bleTaskHandle,
+      0);
+
+  Serial.println("[SYSTEM] Ready");
+}
+
+// ================= MAIN LOOP =================
+void loop()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("[WiFi] Reconnecting...");
+    WiFi.disconnect();
+    WiFi.reconnect();
+    delay(500);
+    return;
+  }
+
+  if (!mqttClient.connected())
+  {
+    connectToMqtt();
+  }
+
+  mqttClient.loop();
+
+  if (ownerFound)
+  {
+    Serial.println("[MAIN] Owner detected → Opening small gate");
+    triggerGateSequence(45, 900);
+    ownerFound = false;
+  }
+
+  if (gateIsMoving && millis() > gateCloseTimer)
+  {
+    Serial.println("[GATE] Auto-closing");
+    setGate(0);
+    gateIsMoving = false;
+  }
+
+  delay(20);
+}
+
+FILE END: .\esp32\src\main.cpp
+
+========================================
+FILE START: .\oldCode\camera.py
+========================================
+import cv2
+import datetime
+import os
+import time
+import numpy as np
+import threading
+from ultralytics import YOLO
+import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
+
+# --- IMPORTS FROM YOUR MODULES ---
+try:
+    from api import geminiApi
+    from db import storeevent
+except ImportError:
+    print("Warning: 'api.py' or 'db.py' not found. Using dummy functions.")
+    def geminiApi(path): pass
+    def storeevent(name, type): pass
+
+load_dotenv()
+
+# ================= CONFIGURATION =================
+MQTT_BROKER     = os.getenv("MQTT_BROKER", "xxxxxx.s1.eu.hivemq.cloud")
+MQTT_PORT       = int(os.getenv("MQTT_PORT", 8883))
+MQTT_USER       = os.getenv("MQTT_USER")
+MQTT_PASS       = os.getenv("MQTT_PASS")
+TOPIC           = os.getenv("MQTT_TOPIC", "gate/control")
+MQTT_CLIENT_ID  = "Master_Controller_01"
+
+MODEL_PATH = r"C:\Users\jy\Desktop\Capstone project\runs\detect\train_dataset_finetune\weights\best.pt"
+CAM_INDEX = 0
+
+# Timers
+PUBLISH_COOLDOWN = 5.0
+GEMINI_INTERVAL  = 10
+RECORDING_PATIENCE = 3.0
+
+# ================= GLOBAL STATE =================
+last_publish = {"person": 0.0, "car": 0.0}
+last_capture_time = 0
+last_person_seen_time = 0
+capturedframe = 0
+recording = False
+writer = None
+width, height = 1280, 720 
+
+# ================= MQTT SETUP =================
+# FIX 1: Added CallbackAPIVersion to fix the DeprecationWarning
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=MQTT_CLIENT_ID)
+
+if MQTT_USER and MQTT_PASS:
+    client.username_pw_set(MQTT_USER, MQTT_PASS)
+
+client.tls_set()
+client.tls_insecure_set(True)
+
+def on_connect(client, userdata, flags, reason_code, properties=None):
+    if reason_code == 0:
+        print("[MQTT] Connected successfully")
+    else:
+        print(f"[MQTT] Connection failed code: {reason_code}")
+
+client.on_connect = on_connect
+
+# ================= HELPER FUNCTIONS =================
+
+def process_gemini_thread(file_path, frame):
+    """Runs in background to avoid freezing video"""
+    try:
+        cv2.imwrite(file_path, frame)
+        print(f"[GEMINI] Snapshot saved. Sending {os.path.basename(file_path)}...")
+        geminiApi(file_path)
+    except Exception as e:
+        print(f"[GEMINI] Error: {e}")
+
+# ================= MAIN EXECUTION =================
+
+def main():
+    # FIX 2: Added 'recording', 'writer', and 'last_person_seen_time' to global
+    global width, height, last_capture_time, capturedframe, last_publish
+    global recording, writer, last_person_seen_time
+
+    # 1. Start MQTT
+    print("[SYSTEM] Connecting to MQTT...")
+    try:
+        client.connect(MQTT_BROKER, MQTT_PORT)
+        client.loop_start()
+    except Exception as e:
+        print(f"[MQTT] Error connecting: {e}")
+
+    # 2. Load Model
+    print(f"[SYSTEM] Loading Model: {MODEL_PATH}")
+    try:
+        model = YOLO(MODEL_PATH)
+    except Exception as e:
+        print(f"[ERROR] Could not load model. Check path: {e}")
+        return
+
+    # 3. Start Camera
+    cam = cv2.VideoCapture(CAM_INDEX)
+    cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    
+    width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"[CAM] Resolution: {width}x{height}")
+
+    # Define ROI (Polygon)
+    roi = np.array([
+        [100, int(height * 0.70)],
+        [width - 100, int(height * 0.70)],
+        [width - 100, height],
+        [100, height]
+    ])
+
+    if not os.path.exists("Frames"):
+        os.makedirs("Frames")
+
+    font = cv2.FONT_HERSHEY_DUPLEX
+    print("[SYSTEM] Starting Loop. Press 'q' to quit.")
+
+    try:
+        while True:
+            success, frame = cam.read()
+            if not success: break
+
+            # 1. Create a Clean Copy for Detection
+            clean_frame = frame.copy()
+            current_time = time.time()
+
+            # 2. Draw ROI & Time on the 'frame' (Background Layer)
+            dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cv2.polylines(frame, [roi], True, (255, 255, 0), 2)
+            cv2.putText(frame, dt, (10, 30), font, 1, (0, 255, 0), 2)
+
+            # 3. Run Detection on CLEAN frame
+            results = model.track(clean_frame, conf=0.45, persist=True, verbose=False)
+            
+            person_in_roi = False
+            detected_classes = []
+
+            if results and len(results[0].boxes) > 0:
+                for box in results[0].boxes:
+                    cls_name = results[0].names[int(box.cls[0])]
+                    detected_classes.append(cls_name)
+
+                    # Check ROI logic
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    center_point = ((x1 + x2)//2, y2)
+                    
+                    if cls_name == "person":
+                        if cv2.pointPolygonTest(roi, center_point, False) >= 0:
+                            person_in_roi = True
+                            last_person_seen_time = current_time
+
+            # 4. Create Final Display Image
+            annotated_frame = results[0].plot(img=frame)
+
+            # Draw Center Points (Optional)
+            if results and len(results[0].boxes) > 0:
+                for box in results[0].boxes:
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    cv2.circle(annotated_frame, ((x1+x2)//2, y2), 5, (0,255,255), -1)
+
+            # Logic: MQTT
+            now = time.time()
+            if "car" in detected_classes and (now - last_publish["car"] > PUBLISH_COOLDOWN):
+                client.publish(TOPIC, "open_big", qos=1)
+                last_publish["car"] = now
+            elif "person" in detected_classes and (now - last_publish["person"] > PUBLISH_COOLDOWN):
+                client.publish(TOPIC, "scan_person", qos=1)
+                last_publish["person"] = now
+
+            # Logic: Recording Start
+            if person_in_roi and not recording:
+                print("[REC] Started (Person Entered)")
+                video_name = datetime.datetime.now().strftime("REC_%Y-%m-%d_%H-%M-%S.mp4")
+                writer = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*"mp4v"), 20, (width, height))
+                recording = True
+
+            # Logic: Recording Stop (With Patience)
+            if recording:
+                writer.write(annotated_frame)
+                
+                time_since_last_seen = current_time - last_person_seen_time
+                
+                if not person_in_roi:
+                    # Visual countdown
+                    remaining = int(RECORDING_PATIENCE - time_since_last_seen)
+                    cv2.putText(annotated_frame, f"Stop in: {remaining}s", (30, 90), font, 0.6, (0, 165, 255), 2)
+
+                if time_since_last_seen > RECORDING_PATIENCE:
+                    print("[REC] Stopped (Person left and patience ended)")
+                    writer.release()
+                    recording = False
+                    writer = None
+            
+            # Visual REC Indicator
+            if recording:
+                 cv2.circle(annotated_frame, (30, 60), 10, (0, 0, 255), -1)
+                 cv2.putText(annotated_frame, "REC", (50, 65), font, 0.7, (0, 0, 255), 2)
+
+            # Logic: Gemini
+            targets = ["person", "car"]
+            if any(t in detected_classes for t in targets) and (current_time - last_capture_time >= GEMINI_INTERVAL):
+                capturedframe += 1
+                threading.Thread(target=process_gemini_thread, 
+                                 args=(f"Frames/{capturedframe}.jpg", clean_frame)).start()
+                last_capture_time = current_time
+
+            cv2.imshow('Main Control System', annotated_frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'): break
+
+    except KeyboardInterrupt: pass
+    finally:
+        # Check if writer exists before releasing
+        if writer is not None: 
+            writer.release()
+        client.loop_stop()
+        client.disconnect()
+        cam.release()
+        cv2.destroyAllWindows()
+        print("[SYSTEM] Cleanup Complete.")
+
+if __name__ == "__main__":
+    main()
+
+FILE END: .\oldCode\camera.py
+
+========================================
+FILE START: .\oldCode\mqtt_client.py
+========================================
+import os
+import time
+import cv2
+from ultralytics import YOLO
+import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
+
+# Load variables from .env
+load_dotenv()
+
+# ------------------ MQTT CONFIG ------------------
+MQTT_BROKER    = os.getenv("MQTT_BROKER")
+MQTT_PORT      = int(os.getenv("MQTT_PORT", 8883))
+MQTT_CLIENT_ID = os.getenv("MQTT_CLIENT_ID", "yolo_publisher")
+MQTT_USER      = os.getenv("MQTT_USER")
+MQTT_PASS      = os.getenv("MQTT_PASS")
+TOPIC          = os.getenv("MQTT_TOPIC", "gate/control")
+
+# ------------------ CAMERA CONFIG ------------------
+CAM_INDEX        = int(os.getenv("CAM_INDEX", 0))
+FRAME_SKIP       = int(os.getenv("FRAME_SKIP", 2))
+PUBLISH_COOLDOWN = float(os.getenv("PUBLISH_COOLDOWN", 5.0))
+
+# ------------------ MQTT CLIENT ------------------
+client = mqtt.Client(client_id=MQTT_CLIENT_ID)
+
+if MQTT_USER and MQTT_PASS:
+    client.username_pw_set(MQTT_USER, MQTT_PASS)
+
+# TLS/SSL for port 8883
+client.tls_set()
+client.tls_insecure_set(True)  # skip cert verification for testing
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("MQTT connected successfully")
+    else:
+        print("MQTT connection failed with code", rc)
+
+client.on_connect = on_connect
+client.connect(MQTT_BROKER, MQTT_PORT)
+client.loop_start()
+
+# ------------------ YOLO MODEL ------------------
+MODEL_PATH = os.getenv("YOLO_MODEL", "yolov8n.pt")
+model = YOLO(MODEL_PATH)
+
+
+cap = cv2.VideoCapture(CAM_INDEX)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+last_publish = {"person": 0.0, "car": 0.0}
+frame_id = 0
+
+print("Starting camera loop. Press Ctrl+C to stop.")
+
+try:
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Camera read failed")
+            break
+        frame_id += 1
+        if frame_id % FRAME_SKIP != 0:
+            cv2.imshow("Preview", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            continue
+
+        # YOLO detection
+        results = model.predict(source=frame, conf=0.45, verbose=False)
+        detected = []
+        if len(results) > 0:
+            for b in results[0].boxes:
+                cls = int(b.cls[0])
+                name = results[0].names[cls]
+                detected.append(name)
+
+        now = time.time()
+        # car priority
+        if "car" in detected and now - last_publish["car"] > PUBLISH_COOLDOWN:
+            print("Detected car -> publish open_big")
+            client.publish(TOPIC, "open_big", qos=1)
+            last_publish["car"] = now
+        elif "person" in detected and now - last_publish["person"] > PUBLISH_COOLDOWN:
+            print("Detected person -> publish scan_person")
+            client.publish(TOPIC, "scan_person", qos=1)
+            last_publish["person"] = now
+
+        # show annotated frame
+        annotated = results[0].plot() if len(results) > 0 else frame
+        cv2.imshow("YOLO", annotated)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+except KeyboardInterrupt:
+    print("Stopping...")
+
+finally:
+    client.loop_stop()
+    client.disconnect()
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+FILE END: .\oldCode\mqtt_client.py
+
+========================================
+FILE START: .\oldCode\server.py
+========================================
+from flask import Flask, jsonify
+from flask_cors import CORS
+import tinytuya
+
+app = Flask(__name__)
+CORS(app)  # Allow React to access this server
+# --- CONFIGURATION (Use your working values) ---
+DEVICE_ID = 'a34998c1f1ade9e273eovl'
+DEVICE_IP = '192.168.100.45'  # The IP that worked
+LOCAL_KEY = 'QB-qEXZm*hc!PMxz'
+VERSION = 3.3  # The version that worked
+# -----------------------------------------------
+
+# Initialize connection once when server starts
+print("Initializing connection to bulb...")
+bulb = tinytuya.BulbDevice(DEVICE_ID, DEVICE_IP, LOCAL_KEY)
+bulb.set_version(VERSION)
+bulb.set_socketPersistent(True)
+
+@app.route('/api/status', methods=['GET'])
+def get_status():
+    try:
+        data = bulb.status()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/on', methods=['POST'])
+def turn_on():
+    try:
+        bulb.turn_on()
+        return jsonify({"status": "on", "message": "Light turned ON"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/off', methods=['POST'])
+def turn_off():
+    try:
+        bulb.turn_off()
+        return jsonify({"status": "off", "message": "Light turned OFF"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    # Run the server on port 5000
+    app.run(debug=True, port=5000)
+
+FILE END: .\oldCode\server.py
+
+========================================
+FILE START: .\oldCode\stream.py
+========================================
+from flask import Flask, Response
+import cv2
+from detect import latest_frame
+
+app = Flask(__name__)
+
+def generate_frames():
+    while True:
+        if latest_frame is None:
+            continue
+        ret, buffer = cv2.imencode('.jpg', latest_frame)
+        frame = buffer.tobytes()
+
+        yield (b"--frame\r\n"
+               b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+
+
+FILE END: .\oldCode\stream.py
+
+========================================
+FILE START: .\oldCode\test_light.py
+========================================
+import tinytuya
+
+# --- CONFIGURATION ---
+# Open your devices.json to find the ID and Key
+DEVICE_ID = 'a34998c1f1ade9e273eovl'
+LOCAL_KEY = 'QB-qEXZm*hc!PMxz'
+
+# You must find the bulb's IP on your network (e.g., 192.168.1.15)
+# Since the wizard scan failed, you have to type this manually.
+DEVICE_IP = '192.168.100.45' 
+
+# Version is usually 3.3 for newer bulbs, or 3.1 for older ones
+VERSION = 3.5
+# ---------------------
+
+print("Connecting to bulb...")
+# Connect to the device
+d = tinytuya.BulbDevice(DEVICE_ID, DEVICE_IP, LOCAL_KEY)
+d.set_version(VERSION)
+d.set_socketPersistent(True)  # Keep connection open for faster response
+
+# Get current status
+data = d.status() 
+print("Current Status:", data)
+
+# Test commands
+print("Turning OFF...")
+d.turn_off()
+
+import time
+time.sleep(2) # Wait 2 seconds
+
+print("Turning ON...")
+d.turn_on()
+
+print("Test complete!")
+
+FILE END: .\oldCode\test_light.py
+
+========================================
+FILE START: .\python-backend\api.py
+========================================
+import os
+import google.generativeai as genai
+import PIL.Image
+from db import storeevent
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Configure the official Google API
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+def geminiApi(filename):
+    content = "API_ERROR"
+    
+    # Prompt for your automation logic
+    prompt_text = (
+        "Analyze this security camera image and classify the situation:\n"
+        "1. If you see a delivery courier or someone holding a package, say 'ALERT: DELIVERY'.\n"
+        "2. If you see a normal visitor standing at the gate, say 'ALERT: VISITOR'.\n"
+        "3. If you see someone loitering, wearing a mask, climbing, or stealing, say 'ALERT: SUSPICIOUS'.\n"
+        "Otherwise, briefly describe the scene."
+    )
+    
+    try:
+        api_key = os.getenv("GOOGLE_API_KEY")
+        print(f"DEBUG: Loaded API Key: {api_key[:5]}..." if api_key else "DEBUG: NO API KEY FOUND")       
+        # 1. Load the Model
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
+
+        # 2. Load the Image directly (No complex Base64 needed!)
+        img = PIL.Image.open(filename)
+
+        # 3. Send Request
+        response = model.generate_content([prompt_text, img])
+        
+        # 4. Get Text
+        content = response.text.strip()
+        print("GOOGLE API SUCCESS:", content)
+
+    except Exception as e:
+        print("GOOGLE API EXCEPTION:", e)
+        content = "System Error"
+
+    finally:
+        # 5. Save to DB and Return
+        storeevent(os.path.basename(filename), content)
+        return content
+
+FILE END: .\python-backend\api.py
+
+========================================
+FILE START: .\python-backend\app.py
+========================================
+from flask import Flask, Response, jsonify, request
+from flask_cors import CORS
+from flask_socketio import SocketIO, emit
+import threading
+import cv2
+import time
+import datetime
+import os
+import numpy as np
+from ultralytics import YOLO
+import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
+from collections import deque
+import json
+from flask import send_from_directory
+import mysql.connector
+import tinytuya
+import requests
+
+try:
+    from api import geminiApi
+    from db import storeevent
+except ImportError:
+    def geminiApi(path): pass
+    def storeevent(name, type): pass
+
+load_dotenv()
+
+app = Flask(__name__)
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# ================= GLOBAL VARIABLES =================
+outputFrame = None
+latest_hq_frame = None
+lock = threading.Lock()
+mqtt_client = None
+is_camera_running = True 
+frame_buffer = deque(maxlen=1)
+
+# Logic Variables
+last_publish = {"person": 0.0, "car": 0.0}
+last_capture_time = 0
+last_person_seen_time = 0
+capturedframe = 0
+recording = False
+writer = None
+system_logs = deque(maxlen=100)  # Increased capacity
+
+# Device tracking
+devices = {
+    "camera": {"online": True, "last_seen": time.time()},
+    "mqtt": {"online": False, "last_seen": 0},
+    "esp32": {"online": False, "last_seen": 0}
+}
+
+bulb_device_id = 'a34998c1f1ade9e273eovl'
+bulb_ip = '192.168.100.45' 
+bulb_local_key = 'QB-qEXZm*hc!PMxz'
+bulb_version = 3.5
+
+print("[SYSTEM] Connecting to Tuya Bulb...")
+try:
+    bulb = tinytuya.BulbDevice(bulb_device_id, bulb_ip, bulb_local_key)
+    bulb.set_version(bulb_version)
+    bulb.set_socketPersistent(True)
+    print("[SYSTEM] Bulb Connected!")
+except Exception as e:
+    print(f"[ERROR] Bulb connection failed: {e}")
+    bulb = None
+# CONFIG
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BASE_DIR) 
+MODEL_PATH = os.path.join(PROJECT_ROOT, "runs", "detect", "train_dataset_finetune", "weights", "best.pt")
+
+CAM_INDEX = int(os.getenv("CAM_INDEX", 0))
+PUBLISH_COOLDOWN = float(os.getenv("PUBLISH_COOLDOWN", 5.0))
+GEMINI_INTERVAL = int(os.getenv("GEMINI_INTERVAL", 5))
+RECORDING_PATIENCE = float(os.getenv("RECORDING_PATIENCE", 3.0))
+
+# OPTIMIZATION CONFIG
+STREAM_WIDTH = 640
+STREAM_HEIGHT = 360
+JPEG_QUALITY = 40  # Increased for better quality
+DETECTION_SKIP = 5  # Process every 3rd frame (was 2)
+frame_count = 0
+TARGET_FPS = 30  # Target streaming FPS
+
+# ================= HELPER FUNCTIONS =================
+def add_log(event_type, message):
+    """Add system log with timestamp and emit via WebSocket"""
+    timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+    log_entry = {
+        "time": timestamp,
+        "event": f"[{event_type}] {message}"
+    }
+    system_logs.append(log_entry)
+    
+    # Emit to connected WebSocket clients
+    try:
+        socketio.emit('new_log', log_entry)
+    except:
+        pass
+
+def update_device_status(device_name, online=True):
+    """Update device online status"""
+    if device_name in devices:
+        devices[device_name]["online"] = online
+        devices[device_name]["last_seen"] = time.time()
+        socketio.emit('device_update', {
+            "device": device_name,
+            "online": online,
+            "timestamp": time.time()
+        })
+
+# ================= MQTT SETUP =================
+def start_mqtt():
+    global mqtt_client
+    broker = os.getenv("MQTT_BROKER", "xxxxxx.s1.eu.hivemq.cloud")
+    port = int(os.getenv("MQTT_PORT", 8883))
+    user = os.getenv("MQTT_USER")
+    pw = os.getenv("MQTT_PASS")
+
+    mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "Flask_Backend_V2")
+    if user and pw:
+        mqtt_client.username_pw_set(user, pw)
+    mqtt_client.tls_set()
+    mqtt_client.tls_insecure_set(True)
+    
+    def on_connect(client, userdata, flags, reason_code, properties=None):
+        if reason_code == 0:
+            update_device_status("mqtt", True)
+            add_log("MQTT", "Connected successfully")
+            # Subscribe to status topics
+            client.subscribe(os.getenv("MQTT_STATUS_TOPIC", "gate/status"))
+        else:
+            update_device_status("mqtt", False)
+            add_log("MQTT", f"Connection failed: {reason_code}")
+    
+    def on_message(client, userdata, msg):
+        """Handle incoming MQTT messages"""
+        try:
+            payload = msg.payload.decode()
+            add_log("MQTT", f"Received: {payload}")
+            
+            # Update ESP32 status
+            if "esp32" in payload.lower():
+                update_device_status("esp32", True)
+        except Exception as e:
+            add_log("ERROR", f"MQTT message error: {e}")
+    
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+    
+    try:
+        mqtt_client.connect(broker, port)
+        mqtt_client.loop_start()
+    except Exception as e:
+        update_device_status("mqtt", False)
+        add_log("MQTT", f"Connection error: {e}")
+
+# ================= PROCESS FUNCTIONS =================
+def process_gemini_thread(file_path, frame):
+    global bulb # Ensure we can access the bulb object
+    
+    try:
+        cv2.imwrite(file_path, frame)
+        
+        # 1. Capture the returned text from Gemini
+        analysis_result = geminiApi(file_path) 
+        
+        add_log("AI", f"Analyzed: {analysis_result}")
+        
+        # 2. VLM AUTOMATION LOGIC        
+        if analysis_result:
+            result_lower = analysis_result.lower()
+            # Send the image + the AI description to your phone
+            send_telegram_alert(f"📢 Analysis: {analysis_result}", file_path)
+            light_triggered = False
+            # Scenario: Delivery or Visitor -> Turn Light ON for convenience
+            if "delivery" in result_lower or "visitor" in result_lower:
+                print("[AI ACTION] Visitor detected. Welcoming light.")
+                if bulb:
+                    bulb.turn_on()
+                    bulb.set_colour(255, 255, 0) 
+                    light_triggered = True
+                    
+            # Scenario: Security Threat -> Turn Light RED (if supported) or ON "suspicious"
+            elif "suspicious" in result_lower or "stealing" in result_lower:
+                print("[AI ACTION] Threat detected! Turning light ON.")
+                if bulb:
+                    bulb.turn_on()
+                    bulb.set_colour(255, 0, 0) 
+                    light_triggered = True
+
+            if light_triggered:
+                # Start a separate thread to count 3 seconds without freezing the app
+                threading.Thread(target=turn_off_light_after_delay, args=(3,)).start()
+                
+        # Emit event update via WebSocket (Keep existing code)
+        socketio.emit('new_event', {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "type": "ai_analysis",
+            "image": os.path.basename(file_path),
+            "analysis": analysis_result # Send the actual text to frontend
+        })
+
+    except Exception as e:
+        add_log("ERROR", f"Gemini processing failed: {e}")
+
+# ================= NOTIFICATION HELPER =================
+def send_telegram_alert(message, image_path=None):
+    """Sends a notification to your Telegram App"""
+    try:
+        # Load credentials from .env
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+        chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+        if not bot_token or not chat_id:
+            print("[WARN] Telegram credentials missing in .env")
+            return
+
+        # API Endpoint
+        send_text_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+
+        # 1. Send Image (if available) with Caption
+        if image_path and os.path.exists(image_path):
+            send_photo_url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+            with open(image_path, "rb") as f:
+                # Send photo with the AI description as the caption
+                requests.post(send_photo_url, 
+                              data={"chat_id": chat_id, "caption": message}, 
+                              files={"photo": f})
+        else:
+            # 2. Fallback to Text Only
+            requests.post(send_text_url, json={"chat_id": chat_id, "text": message})
+        
+        add_log("NOTIFY", "Telegram alert sent")
+
+    except Exception as e:
+        print(f"[ERROR] Failed to send notification: {e}")
+
+# ================= LIGHT TIMER HELPER =================
+def turn_off_light_after_delay(duration=2):
+    """Waits for 'duration' seconds then turns the Tuya bulb OFF"""
+    time.sleep(duration)
+    if bulb:
+        try:
+            bulb.turn_off()
+            add_log("LIGHT", f"Auto-turned OFF after {duration}s")
+        except Exception as e:
+            print(f"[ERROR] Failed to auto-turn off light: {e}")
+
+# ================= CAMERA PROCESS =================
+def camera_processing():
+    global outputFrame, lock, mqtt_client, recording, writer, latest_hq_frame
+    global last_publish, last_capture_time, last_person_seen_time, capturedframe
+    global is_camera_running, frame_count, frame_buffer, bulb # Added bulb global
+
+    add_log("SYSTEM", "Initializing camera system...")
+    print(f"[SYSTEM] Loading Model: {MODEL_PATH}")
+    
+    # Load model to GPU
+    try:
+        model = YOLO(MODEL_PATH).to('cuda')
+    except Exception as e:
+        print(f"[ERROR] Failed to load model to CUDA: {e}")
+        model = YOLO(MODEL_PATH) # Fallback to CPU
+
+    cam = None
+    
+    # Ensure Recordings directory exists
+    rec_dir = os.path.join(PROJECT_ROOT, "Recordings")
+    if not os.path.exists(rec_dir):
+        os.makedirs(rec_dir)
+
+    # Ensure Frames directory exists
+    if not os.path.exists("Frames"):
+        os.makedirs("Frames")
+
+    add_log("SYSTEM", "Camera system ready")
+
+    # Variables for logic
+    font = cv2.FONT_HERSHEY_DUPLEX
+    
+    # We will read these from the first actual frame to be safe
+    real_width = None
+    real_height = None
+
+    # --- NEW: Scheduler Flag ---
+    light_auto_turned_on = False
+
+    try:
+        while True:
+            if not is_camera_running:
+                if cam is not None:
+                    cam.release()
+                    cam = None
+                    update_device_status("camera", False)
+                
+                # Show offline screen
+                with lock:
+                    blank = np.zeros((360, 640, 3), np.uint8) # Default stream size
+                    cv2.putText(blank, "CAMERA OFFLINE", (150, 180), font, 1, (255,255,255), 2)
+                    outputFrame = blank
+                time.sleep(0.5)
+                continue
+
+            if cam is None:
+                cam = cv2.VideoCapture(CAM_INDEX)
+                cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+                cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+                cam.set(cv2.CAP_PROP_FPS, 30)
+                update_device_status("camera", True)
+                add_log("CAMERA", "Camera connected")
+
+            success, frame = cam.read()
+            if not success:
+                print("[ERROR] Failed to read frame")
+                time.sleep(0.1)
+                continue
+
+            # --- DYNAMIC RESOLUTION FIX ---
+            if real_width is None:
+                real_height, real_width = frame.shape[:2]
+                print(f"[SYSTEM] Real Camera Resolution: {real_width}x{real_height}")
+                
+                # Define ROI based on REAL dimensions
+                roi = np.array([
+                    [100, int(real_height * 0.70)],
+                    [real_width - 100, int(real_height * 0.70)],
+                    [real_width - 100, real_height],
+                    [100, real_height]
+                ])
+
+            clean_frame = frame.copy()
+            current_time = time.time()
+            
+            with lock:
+                latest_hq_frame = clean_frame.copy()
+
+            # ---------------------------------------------------------
+            # 1. NEW FEATURE: AUTO LIGHT AT 7 PM (19:00)
+            # ---------------------------------------------------------
+            current_hour = datetime.datetime.now().hour
+            
+            if current_hour == 18 and not light_auto_turned_on:
+                print("[SCHEDULE] It's 7 PM. Turning light ON.")
+                if bulb:
+                    try:
+                        bulb.turn_on()
+                        light_auto_turned_on = True # Lock so we don't spam
+                        add_log("SCHEDULE", "Auto-turned light ON (7 PM)")
+                    except Exception as e:
+                        print(f"[ERROR] Schedule failed: {e}")
+            
+            # Reset flag at Midnight so it works tomorrow
+            elif current_hour == 0:
+                light_auto_turned_on = False
+            # ---------------------------------------------------------
+
+            # YOLO Tracking
+            results = model.track(frame, conf=0.45, persist=True, verbose=False)
+            annotated_frame = results[0].plot()
+
+            # --- ROI & LOGIC ---
+            person_in_roi = False
+            detected_classes = []
+            
+            if results and len(results[0].boxes) > 0:
+                for box in results[0].boxes:
+                    cls_id = int(box.cls[0])
+                    cls_name = results[0].names[cls_id]
+                    detected_classes.append(cls_name)
+                    
+                    # ROI Check
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    center_point = ((x1+x2)//2, y2)
+                    
+                    if cls_name == "person":
+                        if cv2.pointPolygonTest(roi, center_point, False) >= 0:
+                            person_in_roi = True
+                            last_person_seen_time = current_time
+
+            # Draw ROI
+            cv2.polylines(annotated_frame, [roi], True, (255, 255, 0), 2)
+            cv2.putText(annotated_frame, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
+                       (10, 30), font, 0.8, (0, 255, 0), 2)
+
+            # --- RECORDING LOGIC ---
+            if person_in_roi and not recording:
+                filename = datetime.datetime.now().strftime("REC_%Y-%m-%d_%H-%M-%S.mp4")
+                filepath = os.path.join(rec_dir, filename)
+                writer = cv2.VideoWriter(filepath, cv2.VideoWriter_fourcc(*'mp4v'), 25, (real_width, real_height))
+                recording = True
+                add_log("RECORD", f"Started: {filename}")
+                socketio.emit('recording_status', {'recording': True})
+
+            if recording:
+                if writer is not None:
+                    writer.write(annotated_frame)
+                
+                cv2.circle(annotated_frame, (30, 60), 10, (0, 0, 255), -1)
+                cv2.putText(annotated_frame, "REC", (50, 65), font, 0.7, (0, 0, 255), 2)
+                
+                if not person_in_roi:
+                    time_gone = current_time - last_person_seen_time
+                    remaining = int(RECORDING_PATIENCE - time_gone)
+                    cv2.putText(annotated_frame, f"Stop in: {remaining}s", (30, 90), font, 0.6, (0, 165, 255), 2)
+                    
+                    if time_gone > RECORDING_PATIENCE:
+                        writer.release()
+                        writer = None
+                        recording = False
+                        add_log("RECORD", "Recording saved")
+                        socketio.emit('recording_status', {'recording': False})
+
+            # --- WEBSOCKET STREAM OUTPUT ---
+            small_frame = cv2.resize(annotated_frame, (STREAM_WIDTH, STREAM_HEIGHT))
+            with lock:
+                outputFrame = small_frame.copy()
+
+            # --- MQTT LOGIC ---
+            if mqtt_client:
+                if "car" in detected_classes and (current_time - last_publish["car"] > PUBLISH_COOLDOWN):
+                    mqtt_client.publish(os.getenv("MQTT_TOPIC"), "open_big")
+                    last_publish["car"] = current_time
+                    add_log("MQTT", "Sent: open_big")
+                elif "person" in detected_classes and (current_time - last_publish["person"] > PUBLISH_COOLDOWN):
+                    mqtt_client.publish(os.getenv("MQTT_TOPIC"), "scan_person")
+                    last_publish["person"] = current_time
+                    add_log("MQTT", "Sent: scan_person")
+
+            # ---------------------------------------------------------
+            # 2. NEW FEATURE: PERIODIC 30-MIN SCAN + MOTION SCAN
+            # ---------------------------------------------------------
+            elapsed_since_last_ai = current_time - last_capture_time
+            
+            # Trigger A: Motion (Person/Car) detected + Interval passed
+            motion_trigger = any(t in detected_classes for t in ["person", "car"]) and (elapsed_since_last_ai >= GEMINI_INTERVAL)
+            
+            # Trigger B: 30 Minutes (1800s) passed without any check (Periodic Scan)
+            periodic_trigger = elapsed_since_last_ai >= 1800 
+
+            if motion_trigger or periodic_trigger:
+                trigger_reason = "Motion" if motion_trigger else "Periodic Scan"
+                
+                capturedframe += 1
+                # Save raw frame for AI analysis
+                threading.Thread(target=process_gemini_thread, 
+                               args=(f"Frames/{capturedframe}.jpg", clean_frame)).start()
+                
+                last_capture_time = current_time
+                add_log("AI", f"Scan initiated by: {trigger_reason}")
+            # ---------------------------------------------------------
+
+    except Exception as e:
+        print(f"[CRITICAL ERROR] Camera loop crashed: {e}")
+    finally:
+        if writer is not None:
+            writer.release()
+            print("[SYSTEM] Recording saved on exit.")
+        if cam is not None:
+            cam.release()
+def save_snapshot_thread(file_path, frame):
+    try:
+        # Save file locally
+        cv2.imwrite(file_path, frame)
+        
+        # SKIP Gemini API. Directly save to DB.
+        filename = os.path.basename(file_path)
+        static_analysis = "Manual Snapshot" # Static label for the dashboard
+        
+        storeevent(filename, static_analysis)
+        
+        add_log("CONTROL", f"Snapshot saved: {filename}")
+        
+        # Update Frontend immediately
+        socketio.emit('new_event', {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "type": "manual_capture",
+            "image": filename,
+            "analysis": static_analysis 
+        })
+
+    except Exception as e:
+        add_log("ERROR", f"Snapshot failed: {e}")
+
+# ================= FLASK ROUTES =================
+@app.route('/api/on', methods=['POST'])
+def turn_light_on():
+    if bulb:
+        try:
+            bulb.turn_on()
+            return jsonify({"status": "success", "message": "Light turned ON"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "error", "message": "Bulb not connected"}), 500
+
+@app.route('/api/off', methods=['POST'])
+def turn_light_off():
+    if bulb:
+        try:
+            bulb.turn_off()
+            return jsonify({"status": "success", "message": "Light turned OFF"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "error", "message": "Bulb not connected"}), 500
+
+@app.route('/video_feed')
+def video_feed():
+    def generate():
+        global outputFrame, lock
+        
+        # Create a black placeholder frame if camera is broken
+        blank_frame = np.zeros((360, 640, 3), np.uint8)
+        cv2.putText(blank_frame, "NO SIGNAL", (200, 180), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        
+        while True:
+            with lock:
+                if outputFrame is None:
+                    frame_to_encode = blank_frame
+                else:
+                    frame_to_encode = outputFrame
+
+            # --- OPTIMIZATION 1: COMPRESSION ---
+            # We explicitly use JPEG Quality 50 (defined globally) to reduce file size
+            # This makes the stream much faster over Wi-Fi
+            flag, encodedImage = cv2.imencode(".jpg", frame_to_encode, [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY])
+            
+            if not flag:
+                continue
+
+            yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + 
+                  bytearray(encodedImage) + b'\r\n')
+            
+            # --- OPTIMIZATION 2: SYNC FPS ---
+            # Sleep for 0.04s (approx 25 FPS) instead of 0.01s (100 FPS).
+            # This prevents sending duplicate frames and saves network bandwidth.
+            time.sleep(0.04)
+            
+    return Response(generate(), mimetype="multipart/x-mixed-replace; boundary=frame")
+
+# ================= NEW ORGANIZED API ENDPOINTS =================
+
+@app.route('/api/devices', methods=['GET'])
+def get_devices():
+    """Get all connected devices and their status"""
+    device_list = []
+    for name, info in devices.items():
+        last_seen = info["last_seen"]
+        if last_seen > 0:
+            time_diff = time.time() - last_seen
+            if time_diff < 60:
+                last_seen_str = f"{int(time_diff)}s ago"
+            elif time_diff < 3600:
+                last_seen_str = f"{int(time_diff/60)}m ago"
+            else:
+                last_seen_str = f"{int(time_diff/3600)}h ago"
+        else:
+            last_seen_str = "Never"
+            
+        device_list.append({
+            "name": name.upper(),
+            "online": info["online"],
+            "last_seen": last_seen_str,
+            "type": "Camera" if name == "camera" else "Network Service"
+        })
+    
+    return jsonify(device_list)
+
+
+@app.route('/api/control', methods=['POST'])
+def control_gate():
+    data = request.json
+    action = data.get('action')
+    if mqtt_client:
+        mqtt_client.publish(os.getenv("MQTT_TOPIC"), action)
+        add_log("CONTROL", f"Manual trigger: {action}")
+        return jsonify({"status": "success", "action": action})
+    return jsonify({"status": "error", "message": "MQTT not connected"}), 500
+
+@app.route('/api/camera/toggle', methods=['POST'])
+def toggle_camera():
+    global is_camera_running
+    data = request.json
+    is_camera_running = bool(data.get('state', not is_camera_running))
+    add_log("CAMERA", f"Camera {'started' if is_camera_running else 'stopped'}")
+    return jsonify({"state": is_camera_running})
+
+@app.route('/api/camera/status', methods=['GET'])
+def camera_status():
+    return jsonify({"state": is_camera_running})
+
+@app.route('/api/logs', methods=['GET'])
+def get_logs():
+    return jsonify(list(system_logs))
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        "status": "online",
+        "camera": is_camera_running,
+        "mqtt": mqtt_client is not None and devices["mqtt"]["online"],
+        "recording": recording,
+        "timestamp": datetime.datetime.now().isoformat()
+    })
+# --- ADD THIS NEW ROUTE TO SERVE IMAGES ---
+@app.route('/frames/<path:filename>')
+def serve_frames(filename):
+    # This allows the frontend to access images in your 'Frames' folder
+    return send_from_directory(os.path.join(PROJECT_ROOT, 'Frames'), filename)
+
+# --- REPLACE THE EXISTING 'get_events' FUNCTION ---
+@app.route('/api/events', methods=['GET'])
+def get_events():
+    """Fetch real event history from MySQL"""
+    try:
+        # Connect to your Database
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="Kenstar1",
+            database="detectrecord"
+        )
+        cursor = mydb.cursor(dictionary=True) # dictionary=True makes accessing columns easier
+
+        # Get last 20 events, newest first
+        cursor.execute("SELECT * FROM events ORDER BY timestamp DESC LIMIT 20")
+        rows = cursor.fetchall()
+        
+        events_data = []
+        for row in rows:
+            # Create a valid URL for the browser
+            # We use 'image_name' from your DB to build the link
+            image_url = f"{request.host_url}frames/{row['image_name']}"
+            
+            events_data.append({
+                "id": row['id'],
+                "timestamp": row['timestamp'].strftime("%Y-%m-%d %H:%M:%S"),
+                "analysis": row['image_analysis'] or "No analysis available",
+                "image_url": image_url
+            })
+
+        cursor.close()
+        mydb.close()
+        return jsonify(events_data)
+
+    except Exception as e:
+        print("DB Fetch Error:", e)
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/capture', methods=['POST'])
+def manual_capture():
+    global latest_hq_frame, capturedframe
+    
+    if latest_hq_frame is None:
+        return jsonify({"status": "error", "message": "Camera not ready"}), 503
+
+    try:
+        capturedframe += 1
+        # timestamped filename
+        filename = f"Frames/manual_{int(time.time())}.jpg"
+        
+        with lock:
+            frame_to_process = latest_hq_frame.copy()
+
+        # START THE FAST THREAD (No AI)
+        threading.Thread(target=save_snapshot_thread, 
+                         args=(filename, frame_to_process)).start()
+
+        return jsonify({"status": "success", "message": "Snapshot taken"})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# ================= WEBSOCKET HANDLERS =================
+
+@socketio.on('connect')
+def handle_connect():
+    print('[WebSocket] Client connected')
+    emit('connection_status', {'status': 'connected'})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('[WebSocket] Client disconnected')
+
+@socketio.on('request_logs')
+def handle_log_request():
+    emit('logs_update', list(system_logs))
+
+# ================= STARTUP =================
+
+if __name__ == '__main__':
+    add_log("SYSTEM", "Starting Flask server...")
+    start_mqtt()
+    t = threading.Thread(target=camera_processing)
+    t.daemon = True
+    t.start()
+    
+    # Use SocketIO run instead of app.run
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
+
+FILE END: .\python-backend\app.py
+
+========================================
+FILE START: .\python-backend\db.py
+========================================
+import mysql.connector
+import datetime
+import os
+
+def storeevent(filename, content):
+    try:
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="Kenstar1",
+            database="detectrecord"
+        )
+
+        cursor = mydb.cursor()
+
+        sql = """
+        INSERT INTO events (timestamp, image_name, image_path, image_analysis)
+        VALUES (%s, %s, %s, %s)
+        """
+
+        values = (
+            datetime.datetime.now(),
+            filename,
+            os.path.join("Frames", filename),
+            content
+        )
+
+        print("Saving to DB:", values)
+
+        cursor.execute(sql, values)
+        mydb.commit()
+
+        print("Insert successful.")
+
+    except Exception as e:
+        print("DB Error:", type(e).__name__, e)
+
+    finally:
+        try:
+            cursor.close()
+        except:
+            pass
+        try:
+            mydb.close()
+        except:
+            pass
+
+
+FILE END: .\python-backend\db.py
+
+========================================
+FILE START: .\python-backend\devices.json
+========================================
+[
+    {
+        "name": "LED BULB W509Z2",
+        "id": "a34998c1f1ade9e273eovl",
+        "key": "QB-qEXZm*hc!PMxz",
+        "mac": "3c:0b:59:e8:20:8e",
+        "uuid": "9b290f9f64d01088",
+        "category": "dj",
+        "product_name": "LED BULB W509Z2",
+        "product_id": "xibcsv6dp3ajzth9",
+        "biz_type": 0,
+        "model": "\u4eae\u725b \u82af\u7247\u4e0a\u677f BP5758 9w\u7403\u6ce1",
+        "sub": false,
+        "icon": "https://images.iotbing.com/smart/icon/bay17276620713082cth/0d4d6a7f2390f7874670ea40bc8ce506.png",
+        "mapping": {
+            "20": {
+                "code": "switch_led",
+                "type": "Boolean",
+                "values": {}
+            },
+            "21": {
+                "code": "work_mode",
+                "type": "Enum",
+                "values": {
+                    "range": [
+                        "white",
+                        "colour",
+                        "scene",
+                        "music"
+                    ]
+                }
+            },
+            "22": {
+                "code": "bright_value_v2",
+                "type": "Integer",
+                "values": {
+                    "min": 10,
+                    "max": 1000,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "23": {
+                "code": "temp_value_v2",
+                "type": "Integer",
+                "values": {
+                    "min": 0,
+                    "max": 1000,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "24": {
+                "code": "colour_data_v2",
+                "type": "Json",
+                "raw_values": "{\"h\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":360,\"step\":1},\"s\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1},\"v\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1}}",
+                "values": {
+                    "h": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 360,
+                        "step": 1
+                    },
+                    "s": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 1000,
+                        "step": 1
+                    },
+                    "v": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 1000,
+                        "step": 1
+                    }
+                }
+            },
+            "25": {
+                "code": "scene_data_v2",
+                "type": "Json",
+                "raw_values": "{\"scene_num\":{\"min\":1,\"scale\":0,\"max\":8,\"step\":1},\"scene_units\": {\"unit_change_mode\":{\"range\":[\"static\",\"jump\",\"gradient\"]},\"unit_switch_duration\":{\"min\":0,\"scale\":0,\"max\":100,\"step\":1},\"unit_gradient_duration\":{\"min\":0,\"scale\":0,\"max\":100,\"step\":1},\"bright\":{\"min\":0,\"scale\":0,\"max\":1000,\"step\":1},\"temperature\":{\"min\":0,\"scale\":0,\"max\":1000,\"step\":1},\"h\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":360,\"step\":1},\"s\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1},\"v\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1}}}",
+                "values": {
+                    "scene_num": {
+                        "min": 1,
+                        "scale": 0,
+                        "max": 8,
+                        "step": 1
+                    },
+                    "scene_units": {
+                        "unit_change_mode": {
+                            "range": [
+                                "static",
+                                "jump",
+                                "gradient"
+                            ]
+                        },
+                        "unit_switch_duration": {
+                            "min": 0,
+                            "scale": 0,
+                            "max": 100,
+                            "step": 1
+                        },
+                        "unit_gradient_duration": {
+                            "min": 0,
+                            "scale": 0,
+                            "max": 100,
+                            "step": 1
+                        },
+                        "bright": {
+                            "min": 0,
+                            "scale": 0,
+                            "max": 1000,
+                            "step": 1
+                        },
+                        "temperature": {
+                            "min": 0,
+                            "scale": 0,
+                            "max": 1000,
+                            "step": 1
+                        },
+                        "h": {
+                            "min": 0,
+                            "scale": 0,
+                            "unit": "",
+                            "max": 360,
+                            "step": 1
+                        },
+                        "s": {
+                            "min": 0,
+                            "scale": 0,
+                            "unit": "",
+                            "max": 1000,
+                            "step": 1
+                        },
+                        "v": {
+                            "min": 0,
+                            "scale": 0,
+                            "unit": "",
+                            "max": 1000,
+                            "step": 1
+                        }
+                    }
+                }
+            },
+            "26": {
+                "code": "countdown_1",
+                "type": "Integer",
+                "values": {
+                    "unit": "s",
+                    "min": 0,
+                    "max": 86400,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "27": {
+                "code": "music_data",
+                "type": "Json",
+                "raw_values": "{\"change_mode\":{\"range\":[\"direct\",\"gradient\"]}, \"bright\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1}, \"temperature\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1}, \"h\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":360,\"step\":1},\"s\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":255,\"step\":1},\"v\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":255,\"step\":1}}",
+                "values": {
+                    "change_mode": {
+                        "range": [
+                            "direct",
+                            "gradient"
+                        ]
+                    },
+                    "bright": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 1000,
+                        "step": 1
+                    },
+                    "temperature": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 1000,
+                        "step": 1
+                    },
+                    "h": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 360,
+                        "step": 1
+                    },
+                    "s": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 255,
+                        "step": 1
+                    },
+                    "v": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 255,
+                        "step": 1
+                    }
+                }
+            },
+            "28": {
+                "code": "control_data",
+                "type": "Json",
+                "raw_values": "{\"change_mode\":{\"range\":[\"direct\",\"gradient\"]}, \"bright\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1}, \"temperature\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":1000,\"step\":1}, \"h\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":360,\"step\":1},\"s\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":255,\"step\":1},\"v\":{\"min\":0,\"scale\":0,\"unit\":\"\",\"max\":255,\"step\":1}}",
+                "values": {
+                    "change_mode": {
+                        "range": [
+                            "direct",
+                            "gradient"
+                        ]
+                    },
+                    "bright": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 1000,
+                        "step": 1
+                    },
+                    "temperature": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 1000,
+                        "step": 1
+                    },
+                    "h": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 360,
+                        "step": 1
+                    },
+                    "s": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 255,
+                        "step": 1
+                    },
+                    "v": {
+                        "min": 0,
+                        "scale": 0,
+                        "unit": "",
+                        "max": 255,
+                        "step": 1
+                    }
+                }
+            },
+            "30": {
+                "code": "rhythm_mode",
+                "type": "Raw",
+                "values": {
+                    "maxlen": "255"
+                }
+            },
+            "31": {
+                "code": "sleep_mode",
+                "type": "Raw",
+                "values": {
+                    "maxlen": "255"
+                }
+            },
+            "32": {
+                "code": "wakeup_mode",
+                "type": "Raw",
+                "values": {
+                    "maxlen": "255"
+                }
+            },
+            "33": {
+                "code": "power_memory",
+                "type": "Raw",
+                "values": {}
+            },
+            "34": {
+                "code": "do_not_disturb",
+                "type": "Boolean",
+                "values": {}
+            },
+            "209": {
+                "code": "cycle_timing",
+                "type": "Raw",
+                "values": {}
+            },
+            "210": {
+                "code": "random_timing",
+                "type": "Raw",
+                "values": {}
+            }
+        }
+    }
+]
+
+FILE END: .\python-backend\devices.json
+
+========================================
+FILE START: .\python-backend\tinytuya.json
+========================================
+{
+    "apiKey": "e5astau9jk8gfquwphp5",
+    "apiSecret": "d2e535d4d8024c5eb0bf51055c508236",
+    "apiRegion": "sg",
+    "apiDeviceID": "a34998c1f1ade9e273eovl"
+}
+
+FILE END: .\python-backend\tinytuya.json
+
+========================================
+FILE START: .\python-backend\tuya-raw.json
+========================================
+{
+    "result": [
+        {
+            "active_time": 1757656076,
+            "biz_type": 0,
+            "category": "dj",
+            "create_time": 1757656076,
+            "icon": "smart/icon/bay17276620713082cth/0d4d6a7f2390f7874670ea40bc8ce506.png",
+            "id": "a34998c1f1ade9e273eovl",
+            "ip": "161.142.139.11",
+            "lat": "3.05",
+            "local_key": "QB-qEXZm*hc!PMxz",
+            "lon": "101.67",
+            "model": "\u4eae\u725b \u82af\u7247\u4e0a\u677f BP5758 9w\u7403\u6ce1",
+            "name": "LED BULB W509Z2",
+            "online": true,
+            "owner_id": "600744530",
+            "product_id": "xibcsv6dp3ajzth9",
+            "product_name": "LED BULB W509Z2",
+            "status": [
+                {
+                    "code": "switch_led",
+                    "value": true
+                },
+                {
+                    "code": "work_mode",
+                    "value": "white"
+                },
+                {
+                    "code": "bright_value_v2",
+                    "value": 1000
+                },
+                {
+                    "code": "temp_value_v2",
+                    "value": 68
+                },
+                {
+                    "code": "colour_data_v2",
+                    "value": "{\"h\":264,\"s\":1000,\"v\":1000}"
+                },
+                {
+                    "code": "scene_data_v2",
+                    "value": "{\"scene_num\":1,\"scene_units\":[{\"bright\":200,\"h\":0,\"s\":0,\"temperature\":0,\"unit_change_mode\":\"static\",\"unit_gradient_duration\":13,\"unit_switch_duration\":14,\"v\":0}]}"
+                },
+                {
+                    "code": "countdown_1",
+                    "value": 0
+                },
+                {
+                    "code": "music_data",
+                    "value": ""
+                },
+                {
+                    "code": "control_data",
+                    "value": ""
+                },
+                {
+                    "code": "rhythm_mode",
+                    "value": "AAAAAAA="
+                },
+                {
+                    "code": "sleep_mode",
+                    "value": "AAA="
+                },
+                {
+                    "code": "wakeup_mode",
+                    "value": "AAA="
+                },
+                {
+                    "code": "power_memory",
+                    "value": "AAEBCAPoA+gD6ABE"
+                },
+                {
+                    "code": "do_not_disturb",
+                    "value": false
+                },
+                {
+                    "code": "cycle_timing",
+                    "value": "AAAA"
+                },
+                {
+                    "code": "random_timing",
+                    "value": "AAAA"
+                }
+            ],
+            "sub": false,
+            "time_zone": "+08:00",
+            "uid": "sg1757655824358IUkj1",
+            "update_time": 1757661870,
+            "uuid": "9b290f9f64d01088"
+        }
+    ],
+    "success": true,
+    "t": 1764951936785,
+    "tid": "07dc3695d1f711f0a811963f910a52a4",
+    "file": {
+        "name": "tuya-raw.json",
+        "description": "Full raw list of Tuya devices.",
+        "account": "e5astau9jk8gfquwphp5",
+        "date": "2025-12-06T00:25:35.813701",
+        "tinytuya": "1.17.4"
+    }
+}
+
+FILE END: .\python-backend\tuya-raw.json
+
+========================================
+FILE START: .\react-frontend\eslint.config.js
+========================================
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+
+
+FILE END: .\react-frontend\eslint.config.js
+
+========================================
+FILE START: .\react-frontend\index.html
+========================================
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>react-frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+
+FILE END: .\react-frontend\index.html
+
+========================================
+FILE START: .\react-frontend\package.json
+========================================
+{
+  "name": "react-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "lucide-react": "^0.556.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.10.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.2.4"
+  }
+}
+
+
+FILE END: .\react-frontend\package.json
+
+========================================
+FILE START: .\react-frontend\postcss.config.js
+========================================
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+FILE END: .\react-frontend\postcss.config.js
+
+========================================
+FILE START: .\react-frontend\README.md
+========================================
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+
+FILE END: .\react-frontend\README.md
+
+========================================
+FILE START: .\react-frontend\tailwind.config.js
+========================================
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+FILE END: .\react-frontend\tailwind.config.js
+
+========================================
+FILE START: .\react-frontend\vite.config.js
+========================================
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: true,  // 🟢 THIS is the magic line that exposes it to Wi-Fi
+    port: 5173,  // This ensures the port stays the same
+  }
+})
+
+FILE END: .\react-frontend\vite.config.js
+
+========================================
+FILE START: .\react-frontend\src\App.css
+========================================
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+FILE END: .\react-frontend\src\App.css
+
+========================================
+FILE START: .\react-frontend\src\App.jsx
+========================================
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import { LayoutDashboard, Cctv, Menu, X } from "lucide-react";
+import Dashboard from "./pages/Dashboard";
+import CameraPage from "./pages/CameraPage";
+
+// Sidebar Link Component (Updated to close menu on click)
+const NavItem = ({ to, icon: Icon, label, onClick }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+  return (
+    <Link 
+      to={to} 
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+    >
+      <Icon size={20} />
+      <span className="font-medium">{label}</span>
+    </Link>
+  );
+};
+
+export default function App() {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <Router>
+      <div className="flex h-screen bg-slate-900 text-slate-200 overflow-hidden">
+        
+        {/* MOBILE OVERLAY (Click background to close) */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* SIDEBAR */}
+        <div className={`
+            fixed inset-y-0 left-0 z-50 w-64 bg-slate-950 border-r border-slate-800 flex flex-col p-4 
+            transition-transform duration-300 ease-in-out
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+            md:relative md:translate-x-0
+        `}>
+          <div className="mb-8 px-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Cctv className="text-white" size={20} />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight">Smart<span className="text-blue-500">Cam</span></h3>
+            </div>
+            {/* Close Button (Mobile Only) */}
+            <button 
+                onClick={() => setSidebarOpen(false)} 
+                className="md:hidden text-slate-400 hover:text-white bg-slate-800 p-1 rounded-lg"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <nav className="space-y-2 flex-1">
+            <NavItem 
+                to="/" 
+                icon={LayoutDashboard} 
+                label="Dashboard" 
+                onClick={() => setSidebarOpen(false)} 
+            />
+            <NavItem 
+                to="/camera" 
+                icon={Cctv} 
+                label="Live Camera" 
+                onClick={() => setSidebarOpen(false)} 
+            />
+          </nav>
+          
+          <div className="mt-auto px-4 py-4 text-xs text-slate-600 text-center">
+            v1.0.0 Mobile Ready
+          </div>
+        </div>
+
+        {/* MAIN CONTENT WRAPPER */}
+        <div className="flex-1 flex flex-col h-full w-full relative">
+            
+            {/* MOBILE HEADER (Hamburger Menu) */}
+            <div className="md:hidden h-16 bg-slate-950 border-b border-slate-800 flex items-center px-4 justify-between shrink-0 sticky top-0 z-30">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <Cctv className="text-white" size={20} />
+                    </div>
+                    <span className="font-bold text-lg text-white">SmartCam</span>
+                </div>
+                <button 
+                    onClick={() => setSidebarOpen(true)} 
+                    className="p-2 text-slate-200 hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                    <Menu size={28} />
+                </button>
+            </div>
+
+            {/* SCROLLABLE PAGE AREA */}
+            <div className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-900">
+                <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/camera" element={<CameraPage />} />
+                </Routes>
+            </div>
+        </div>
+
+      </div>
+    </Router>
+  );
+}
+
+FILE END: .\react-frontend\src\App.jsx
+
+========================================
+FILE START: .\react-frontend\src\index.css
+========================================
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0f172a; /* Dark Slate Background */
+  color: #e2e8f0;            /* Soft White Text */
+  overflow: hidden;          /* Prevents double scrollbars */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #1e293b; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+FILE END: .\react-frontend\src\index.css
+
+========================================
+FILE START: .\react-frontend\src\main.jsx
+========================================
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+FILE END: .\react-frontend\src\main.jsx
+
+========================================
+FILE START: .\react-frontend\src\pages\CameraPage.jsx
+========================================
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Settings, Power, Wifi, Video, Mic, ShieldCheck, Lightbulb, Camera, LightbulbOff } from "lucide-react";
+
+const CameraPage = () => {
+  // CONFIG: Change this to your backend IP
+  const [serverIP, setServerIP] = useState("192.168.100.8");
+  const API_BASE = `http://${serverIP}:5000`;
+
+  const [logs, setLogs] = useState([]);
+  const [camState, setCamState] = useState(true);
+  const [systemHealth, setSystemHealth] = useState(null);
+  
+  // NEW: Track Light State (Default to false/off)
+  const [lightOn, setLightOn] = useState(false);
+
+  // --- FETCH DATA ---
+  useEffect(() => {
+    const fetchHealth = () => {
+      axios.get(`${API_BASE}/api/health`)
+        .then(res => setSystemHealth(res.data))
+        .catch(console.error);
+    };
+    
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 5000);
+    return () => clearInterval(interval);
+  }, [serverIP]);
+
+  // --- ACTIONS ---
+  const sendCommand = (action) => {
+    axios.post(`${API_BASE}/api/control`, { action })
+      .then(() => alert(`Sent: ${action}`))
+      .catch(() => alert("Failed to send command"));
+  };
+
+  // UPDATED: Toggle Light Function
+  const toggleLight = () => {
+    const newState = !lightOn; // Calculate opposite of current state
+    const endpoint = newState ? '/api/on' : '/api/off';
+    
+    axios.post(`${API_BASE}${endpoint}`)
+      .then(res => {
+          setLightOn(newState); // Update UI state only if successful
+          // Optional: Show toast or alert
+          // alert(`Light turned ${newState ? 'ON' : 'OFF'}`);
+      })
+      .catch(err => alert("Error: Check Python Backend Connection"));
+  };
+
+const handleCapture = () => {
+    // Optional: Update button text to show loading state
+    const btnText = document.getElementById("capture-text");
+    if (btnText) btnText.innerText = "Saving...";
+
+    // Make sure to use the lowercase endpoint '/api/capture'
+    axios.post(`${API_BASE}/api/capture`)
+      .then(res => {
+        alert(res.data.message); // "Snapshot taken"
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error: Could not take screenshot.");
+      })
+      .finally(() => {
+        // Reset button text
+        if (btnText) btnText.innerText = "Capture";
+      });
+  };
+
+  // --- UI COMPONENTS ---
+  const StatusBadge = ({ label, active, icon: Icon, color = "green" }) => (
+    <div className="flex-shrink-0 flex items-center gap-3 bg-slate-800/50 p-3 rounded-xl border border-slate-700 min-w-[140px]">
+      <div className={`p-2 rounded-lg ${active ? `bg-${color}-500/20 text-${color}-400` : 'bg-slate-700 text-slate-500'}`}>
+        <Icon size={20} />
+      </div>
+      <div>
+        <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">{label}</p>
+        <p className={`text-sm font-bold ${active ? 'text-white' : 'text-slate-500'}`}>
+          {active ? 'ONLINE' : 'OFFLINE'}
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="p-4 lg:p-6 max-w-[1600px] mx-auto text-slate-200 min-h-screen pb-20">
+      
+      {/* 1. Header & Status */}
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-row items-center justify-between gap-4">
+             <label className="text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Server IP</label>
+             <input 
+                type="text" 
+                value={serverIP}
+                onChange={(e) => setServerIP(e.target.value)}
+                className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white font-mono w-full text-sm"
+             />
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            <StatusBadge label="Camera" active={systemHealth?.camera} icon={Video} />
+            <StatusBadge label="MQTT Link" active={systemHealth?.mqtt} icon={Wifi} color="blue" />
+            <StatusBadge label="Recording" active={systemHealth?.recording} icon={Mic} color="red" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* 2. Main Video Feed */}
+        <div className="lg:col-span-2 space-y-4 lg:space-y-6">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-700 bg-black shadow-2xl">
+                <div className="absolute top-4 left-4 bg-red-600/90 text-white text-[10px] font-bold px-3 py-1 rounded-full animate-pulse z-10">
+                    LIVE FEED
+                </div>
+                <div className="aspect-video w-full bg-slate-950 flex items-center justify-center">
+                    <img 
+                        src={`${API_BASE}/video_feed`}
+                        alt="Live Stream"
+                        className="w-full h-full object-contain"
+                        onError={(e) => { e.target.style.display='none'; }} 
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center -z-10">
+                        <span className="text-slate-600 font-mono text-sm">Connecting to stream...</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Control Buttons */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+                <button onClick={() => sendCommand("open_big")} className="p-4 bg-blue-600 active:bg-blue-700 text-white rounded-xl font-bold shadow-lg flex flex-col items-center justify-center gap-2 h-24 lg:h-auto">
+                    <ShieldCheck size={24} />
+                    <span className="text-sm">Open Gate</span>
+                </button>
+
+                {/* TOGGLE LIGHT BUTTON */}
+                <button 
+                    onClick={toggleLight} 
+                    className={`p-4 rounded-xl font-bold shadow-lg flex flex-col items-center justify-center gap-2 h-24 lg:h-auto transition-all ${
+                        lightOn 
+                        ? "bg-yellow-500 text-slate-900 hover:bg-yellow-400"  // ON Style
+                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"   // OFF Style
+                    }`}
+                >
+                    {lightOn ? <Lightbulb size={24} /> : <LightbulbOff size={24} />}
+                    <span className="text-sm">{lightOn ? "Light ON" : "Light OFF"}</span>
+                </button>
+
+                <button 
+                    onClick={handleCapture} 
+                    className="p-4 bg-purple-600 active:bg-purple-700 text-white rounded-xl font-bold shadow-lg flex flex-col items-center justify-center gap-2 h-24 lg:h-auto"
+                >
+                    <Camera size={24} />
+                    {/* ADD id="capture-text" HERE */}
+                    <span id="capture-text" className="text-sm">Capture</span>
+                </button>
+
+                <button onClick={() => sendCommand("close_gate")} className="p-4 bg-red-600 active:bg-red-700 text-white rounded-xl font-bold shadow-lg flex flex-col items-center justify-center gap-2 h-24 lg:h-auto">
+                    <Power size={24} />
+                    <span className="text-sm">Close Gate</span>
+                </button>
+            </div>
+        </div>
+
+        {/* 3. Instructions / Logs */}
+        <div className="bg-slate-800 rounded-2xl border border-slate-700 p-4 lg:p-6 h-fit">
+            <h3 className="font-bold text-white mb-4 flex items-center gap-2 text-lg">
+                <Settings className="text-emerald-400" /> Control Panel
+            </h3>
+            
+            <div className="p-4 bg-slate-900 rounded-xl border border-slate-800">
+                <h4 className="text-xs font-bold text-slate-500 uppercase mb-3">Debug Actions</h4>
+                <div className="grid grid-cols-2 gap-3">
+                    <button onClick={() => sendCommand("test_log")} className="py-2 bg-slate-700 text-xs rounded hover:bg-slate-600 text-slate-200">Test Log</button>
+                    <button onClick={() => sendCommand("reset")} className="py-2 bg-slate-700 text-xs rounded hover:bg-slate-600 text-slate-200">Reset AI</button>
+                </div>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default CameraPage;
+
+FILE END: .\react-frontend\src\pages\CameraPage.jsx
+
+========================================
+FILE START: .\react-frontend\src\pages\Dashboard.jsx
+========================================
+import React, { useState, useEffect } from 'react';
+import { Activity, Wifi, Video, Camera, Clock, FileText, Eye, RefreshCw } from 'lucide-react';
+import { io } from "socket.io-client";
+
+// REPLACE WITH YOUR IP IF NEEDED (e.g., 'http://192.168.100.8:5000')
+const API_BASE = 'http://192.168.100.8:5000';
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({ camera: false, mqtt: false, recording: false });
+  const [logs, setLogs] = useState([]);
+  const [events, setEvents] = useState([]); // Stores the DB table data
+  const [loading, setLoading] = useState(false);
+
+  // --- 1. Fetch Data Logic ---
+  const fetchData = () => {
+    // Fetch System Health
+    fetch(`${API_BASE}/api/health`)
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(console.error);
+    
+    // Fetch DB Events for Table
+    setLoading(true);
+    fetch(`${API_BASE}/api/events`)
+        .then(res => res.json())
+        .then(data => {
+            if(Array.isArray(data)) setEvents(data);
+            setLoading(false);
+        })
+        .catch(e => { console.error(e); setLoading(false); });
+  };
+
+  useEffect(() => {
+    const socket = io(API_BASE);
+    
+    // Listen for real-time updates
+    socket.on('device_update', () => fetchData());
+    socket.on('new_log', (log) => setLogs(prev => [log, ...prev].slice(0, 20)));
+    socket.on('new_event', () => {
+        // When AI detects something, refresh the table automatically
+        fetchData();
+    });
+
+    fetchData(); // Initial load
+    const interval = setInterval(fetchData, 5000); // Poll every 5s as backup
+    return () => { socket.disconnect(); clearInterval(interval); };
+  }, []);
+
+  // --- 2. Helper Components ---
+  const Card = ({ title, status, icon: Icon, color }) => (
+    <div className="bg-slate-800 border border-slate-700 p-6 rounded-2xl relative overflow-hidden transition-all hover:border-slate-600">
+      <div className={`absolute top-0 right-0 p-4 opacity-10 ${status ? `text-${color}-500` : 'text-slate-500'}`}><Icon size={80} /></div>
+      <h3 className="text-slate-400 text-sm font-bold uppercase tracking-wider">{title}</h3>
+      <div className="flex items-center gap-3 mt-2">
+        <div className={`w-3 h-3 rounded-full ${status ? `bg-${color}-500 shadow-[0_0_10px]` : 'bg-slate-600'}`}></div>
+        <span className="text-2xl font-bold text-white">{status ? 'ONLINE' : 'OFFLINE'}</span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-8 pb-10">
+      
+      {/* HEADER */}
+      <div className="flex justify-between items-end">
+        <div>
+            <h2 className="text-3xl font-bold text-white">System Overview</h2>
+            <p className="text-slate-400 mt-1">Real-time monitoring & detection logs</p>
+        </div>
+        <button onClick={fetchData} className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors">
+            <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+        </button>
+      </div>
+      
+      {/* 1. TOP STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card title="Camera Feed" status={stats.camera} icon={Camera} color="green" />
+        <Card title="MQTT Link" status={stats.mqtt} icon={Wifi} color="blue" />
+        <Card title="Recording" status={stats.recording} icon={Video} color="red" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* 2. DETECTION HISTORY TABLE (Takes up 2/3 space) */}
+        <div className="lg:col-span-2 bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden flex flex-col h-[500px]">
+            <div className="p-5 border-b border-slate-700 bg-slate-800 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <FileText className="text-blue-400" size={20}/> Detection History
+                </h3>
+                <span className="text-xs bg-blue-900/30 text-blue-300 px-2 py-1 rounded border border-blue-900/50">
+                    Latest {events.length}
+                </span>
+            </div>
+            
+            <div className="overflow-auto flex-1 p-0">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-slate-900/50 text-slate-400 text-xs uppercase sticky top-0 backdrop-blur-md">
+                        <tr>
+                            <th className="p-4 font-semibold">Time</th>
+                            <th className="p-4 font-semibold">AI Analysis</th>
+                            <th className="p-4 font-semibold text-right">Proof</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/50 text-sm">
+                        {events.length === 0 ? (
+                            <tr><td colSpan="3" className="p-8 text-center text-slate-500">No detections recorded yet.</td></tr>
+                        ) : (
+                            events.map((ev) => (
+                                <tr key={ev.id} className="hover:bg-slate-700/30 transition-colors group">
+                                    <td className="p-4 text-slate-300 font-mono whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <Clock size={14} className="text-slate-500"/> {ev.timestamp}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-slate-200">
+                                        {ev.analysis.includes("API_ERROR") ? (
+                                            <span className="text-red-400 flex items-center gap-1"><Activity size={14}/> Analysis Failed</span>
+                                        ) : (
+                                            ev.analysis
+                                        )}
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <a href={ev.image_url} target="_blank" rel="noopener noreferrer" 
+                                           className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-blue-600 text-white text-xs rounded-lg transition-all group-hover:shadow-lg">
+                                            <Eye size={14} /> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {/* 3. SYSTEM LOGS (Side Panel) */}
+        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 h-[500px] flex flex-col">
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <Activity className="text-emerald-400" size={20} /> System Logs
+          </h3>
+          <div className="space-y-2 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+            {logs.length === 0 && <p className="text-slate-500 text-center mt-10">System is quiet...</p>}
+            {logs.map((log, i) => (
+              <div key={i} className="flex gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700/50 hover:border-slate-600 transition-colors">
+                <span className="text-[10px] font-mono text-slate-500 mt-0.5">{log.time}</span>
+                <span className="text-xs text-slate-300 leading-relaxed">{log.event}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+FILE END: .\react-frontend\src\pages\Dashboard.jsx

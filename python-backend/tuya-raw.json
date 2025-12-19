@@ -1,0 +1,103 @@
+{
+    "result": [
+        {
+            "active_time": 1757656076,
+            "biz_type": 0,
+            "category": "dj",
+            "create_time": 1757656076,
+            "icon": "smart/icon/bay17276620713082cth/0d4d6a7f2390f7874670ea40bc8ce506.png",
+            "id": "a34998c1f1ade9e273eovl",
+            "ip": "161.142.139.11",
+            "lat": "3.05",
+            "local_key": "QB-qEXZm*hc!PMxz",
+            "lon": "101.67",
+            "model": "\u4eae\u725b \u82af\u7247\u4e0a\u677f BP5758 9w\u7403\u6ce1",
+            "name": "LED BULB W509Z2",
+            "online": true,
+            "owner_id": "600744530",
+            "product_id": "xibcsv6dp3ajzth9",
+            "product_name": "LED BULB W509Z2",
+            "status": [
+                {
+                    "code": "switch_led",
+                    "value": true
+                },
+                {
+                    "code": "work_mode",
+                    "value": "white"
+                },
+                {
+                    "code": "bright_value_v2",
+                    "value": 1000
+                },
+                {
+                    "code": "temp_value_v2",
+                    "value": 68
+                },
+                {
+                    "code": "colour_data_v2",
+                    "value": "{\"h\":264,\"s\":1000,\"v\":1000}"
+                },
+                {
+                    "code": "scene_data_v2",
+                    "value": "{\"scene_num\":1,\"scene_units\":[{\"bright\":200,\"h\":0,\"s\":0,\"temperature\":0,\"unit_change_mode\":\"static\",\"unit_gradient_duration\":13,\"unit_switch_duration\":14,\"v\":0}]}"
+                },
+                {
+                    "code": "countdown_1",
+                    "value": 0
+                },
+                {
+                    "code": "music_data",
+                    "value": ""
+                },
+                {
+                    "code": "control_data",
+                    "value": ""
+                },
+                {
+                    "code": "rhythm_mode",
+                    "value": "AAAAAAA="
+                },
+                {
+                    "code": "sleep_mode",
+                    "value": "AAA="
+                },
+                {
+                    "code": "wakeup_mode",
+                    "value": "AAA="
+                },
+                {
+                    "code": "power_memory",
+                    "value": "AAEBCAPoA+gD6ABE"
+                },
+                {
+                    "code": "do_not_disturb",
+                    "value": false
+                },
+                {
+                    "code": "cycle_timing",
+                    "value": "AAAA"
+                },
+                {
+                    "code": "random_timing",
+                    "value": "AAAA"
+                }
+            ],
+            "sub": false,
+            "time_zone": "+08:00",
+            "uid": "sg1757655824358IUkj1",
+            "update_time": 1757661870,
+            "uuid": "9b290f9f64d01088"
+        }
+    ],
+    "success": true,
+    "t": 1764951936785,
+    "tid": "07dc3695d1f711f0a811963f910a52a4",
+    "file": {
+        "name": "tuya-raw.json",
+        "description": "Full raw list of Tuya devices.",
+        "account": "e5astau9jk8gfquwphp5",
+        "date": "2025-12-06T00:25:35.813701",
+        "tinytuya": "1.17.4"
+    }
+}
