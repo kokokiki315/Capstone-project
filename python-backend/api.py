@@ -23,7 +23,7 @@ def geminiApi(filename):
     
     try:
         # --- FIX 1: Use the specific model version ---
-        model = genai.GenerativeModel('gemini-1.5-flash-latest') 
+        model = genai.GenerativeModel('gemini-2.5-flash-lite') 
         
         # --- FIX 2: Debug Print ---
         print(f"[DEBUG] Sending {filename} to Google AI...")

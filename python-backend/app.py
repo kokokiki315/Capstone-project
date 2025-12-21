@@ -78,15 +78,13 @@ PUBLISH_COOLDOWN = float(os.getenv("PUBLISH_COOLDOWN", 5.0))
 GEMINI_INTERVAL = int(os.getenv("GEMINI_INTERVAL", 5))
 RECORDING_PATIENCE = float(os.getenv("RECORDING_PATIENCE", 3.0))
 
-# OPTIMIZATION CONFIG
 STREAM_WIDTH = 640
 STREAM_HEIGHT = 360
-JPEG_QUALITY = 40  # Increased for better quality
-DETECTION_SKIP = 5  # Process every 3rd frame (was 2)
+JPEG_QUALITY = 40  
+DETECTION_SKIP = 5 
 frame_count = 0
-TARGET_FPS = 30  # Target streaming FPS
+TARGET_FPS = 30  
 
-# ================= HELPER FUNCTIONS =================
 def add_log(event_type, message):
     """Add system log with timestamp and emit via WebSocket"""
     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
@@ -96,7 +94,6 @@ def add_log(event_type, message):
     }
     system_logs.append(log_entry)
     
-    # Emit to connected WebSocket clients
     try:
         socketio.emit('new_log', log_entry)
     except:
@@ -143,7 +140,7 @@ def start_mqtt():
             payload = msg.payload.decode()
             add_log("MQTT", f"Received: {payload}")
             
-            # Update ESP32 status
+            
             if "esp32" in payload.lower():
                 update_device_status("esp32", True)
         except Exception as e:
@@ -161,23 +158,21 @@ def start_mqtt():
 
 # ================= PROCESS FUNCTIONS =================
 def process_gemini_thread(file_path, frame):
-    global bulb # Ensure we can access the bulb object
+    global bulb 
     
     try:
         cv2.imwrite(file_path, frame)
         
-        # 1. Capture the returned text from Gemini
+        
         analysis_result = geminiApi(file_path) 
         
         add_log("AI", f"Analyzed: {analysis_result}")
         
-        # 2. VLM AUTOMATION LOGIC        
+           
         if analysis_result:
             result_lower = analysis_result.lower()
-            # Send the image + the AI description to your phone
-            send_telegram_alert(f"📢 Analysis: {analysis_result}", file_path)
+            send_telegram_alert(f" Analysis: {analysis_result}", file_path)
             light_triggered = False
-            # Scenario: Delivery or Visitor -> Turn Light ON for convenience
             if "delivery" in result_lower or "visitor" in result_lower:
                 print("[AI ACTION] Visitor detected. Welcoming light.")
                 if bulb:
@@ -185,7 +180,6 @@ def process_gemini_thread(file_path, frame):
                     bulb.set_colour(255, 255, 0) 
                     light_triggered = True
                     
-            # Scenario: Security Threat -> Turn Light RED (if supported) or ON "suspicious"
             elif "suspicious" in result_lower or "stealing" in result_lower:
                 print("[AI ACTION] Threat detected! Turning light ON.")
                 if bulb:
@@ -194,25 +188,21 @@ def process_gemini_thread(file_path, frame):
                     light_triggered = True
 
             if light_triggered:
-                # Start a separate thread to count 3 seconds without freezing the app
                 threading.Thread(target=turn_off_light_after_delay, args=(3,)).start()
                 
-        # Emit event update via WebSocket (Keep existing code)
         socketio.emit('new_event', {
             "timestamp": datetime.datetime.now().isoformat(),
             "type": "ai_analysis",
             "image": os.path.basename(file_path),
-            "analysis": analysis_result # Send the actual text to frontend
+            "analysis": analysis_result 
         })
 
     except Exception as e:
         add_log("ERROR", f"Gemini processing failed: {e}")
 
-# ================= NOTIFICATION HELPER =================
 def send_telegram_alert(message, image_path=None):
     """Sends a notification to your Telegram App"""
     try:
-        # Load credentials from .env
         bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
         chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -220,19 +210,15 @@ def send_telegram_alert(message, image_path=None):
             print("[WARN] Telegram credentials missing in .env")
             return
 
-        # API Endpoint
         send_text_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
 
-        # 1. Send Image (if available) with Caption
         if image_path and os.path.exists(image_path):
             send_photo_url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
             with open(image_path, "rb") as f:
-                # Send photo with the AI description as the caption
                 requests.post(send_photo_url, 
                               data={"chat_id": chat_id, "caption": message}, 
                               files={"photo": f})
         else:
-            # 2. Fallback to Text Only
             requests.post(send_text_url, json={"chat_id": chat_id, "text": message})
         
         add_log("NOTIFY", "Telegram alert sent")
@@ -240,7 +226,6 @@ def send_telegram_alert(message, image_path=None):
     except Exception as e:
         print(f"[ERROR] Failed to send notification: {e}")
 
-# ================= LIGHT TIMER HELPER =================
 def turn_off_light_after_delay(duration=2):
     """Waits for 'duration' seconds then turns the Tuya bulb OFF"""
     time.sleep(duration)
@@ -251,7 +236,6 @@ def turn_off_light_after_delay(duration=2):
         except Exception as e:
             print(f"[ERROR] Failed to auto-turn off light: {e}")
 
-# ================= CAMERA PROCESS =================
 def camera_processing():
     global outputFrame, lock, mqtt_client, recording, writer, latest_hq_frame
     global last_publish, last_capture_time, last_person_seen_time, capturedframe
@@ -260,34 +244,28 @@ def camera_processing():
     add_log("SYSTEM", "Initializing camera system...")
     print(f"[SYSTEM] Loading Model: {MODEL_PATH}")
     
-    # Load model to GPU
     try:
         model = YOLO(MODEL_PATH).to('cuda')
     except Exception as e:
         print(f"[ERROR] Failed to load model to CUDA: {e}")
-        model = YOLO(MODEL_PATH) # Fallback to CPU
+        model = YOLO(MODEL_PATH)
 
     cam = None
     
-    # Ensure Recordings directory exists
     rec_dir = os.path.join(PROJECT_ROOT, "Recordings")
     if not os.path.exists(rec_dir):
         os.makedirs(rec_dir)
 
-    # Ensure Frames directory exists
     if not os.path.exists("Frames"):
         os.makedirs("Frames")
 
     add_log("SYSTEM", "Camera system ready")
 
-    # Variables for logic
     font = cv2.FONT_HERSHEY_DUPLEX
     
-    # We will read these from the first actual frame to be safe
     real_width = None
     real_height = None
 
-    # --- NEW: Scheduler Flag ---
     light_auto_turned_on = False
 
     try:
@@ -320,7 +298,6 @@ def camera_processing():
                 time.sleep(0.1)
                 continue
 
-            # --- DYNAMIC RESOLUTION FIX ---
             if real_width is None:
                 real_height, real_width = frame.shape[:2]
                 print(f"[SYSTEM] Real Camera Resolution: {real_width}x{real_height}")
@@ -339,7 +316,6 @@ def camera_processing():
             with lock:
                 latest_hq_frame = clean_frame.copy()
 
-            # 1. NEW FEATURE: AUTO LIGHT AT 7 PM (19:00)
             current_hour = datetime.datetime.now().hour
             
             if current_hour == 18 and not light_auto_turned_on:
@@ -347,12 +323,11 @@ def camera_processing():
                 if bulb:
                     try:
                         bulb.turn_on()
-                        light_auto_turned_on = True # Lock so we don't spam
+                        light_auto_turned_on = True 
                         add_log("SCHEDULE", "Auto-turned light ON (7 PM)")
                     except Exception as e:
                         print(f"[ERROR] Schedule failed: {e}")
             
-            # Reset flag at Midnight so it works tomorrow
             elif current_hour == 0:
                 light_auto_turned_on = False
 
@@ -370,7 +345,6 @@ def camera_processing():
                     cls_name = results[0].names[cls_id]
                     detected_classes.append(cls_name)
                     
-                    # ROI Check
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
                     center_point = ((x1+x2)//2, y2)
                     
@@ -384,7 +358,7 @@ def camera_processing():
             cv2.putText(annotated_frame, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
                        (10, 30), font, 0.8, (0, 255, 0), 2)
 
-            # --- RECORDING LOGIC ---
+            # RECORDING LOGIC
             if person_in_roi and not recording:
                 filename = datetime.datetime.now().strftime("REC_%Y-%m-%d_%H-%M-%S.mp4")
                 filepath = os.path.join(rec_dir, filename)
@@ -412,11 +386,11 @@ def camera_processing():
                         add_log("RECORD", "Recording saved")
                         socketio.emit('recording_status', {'recording': False})
 
-            # --- WEBSOCKET STREAM OUTPUT ---
+            # WEBSOCKET STREAM OUTPUT
             small_frame = cv2.resize(annotated_frame, (STREAM_WIDTH, STREAM_HEIGHT))
             with lock:
                 outputFrame = small_frame.copy()
-            # --- MQTT LOGIC ---
+            # MQTT LOGIC 
             if mqtt_client:
                 if "car" in detected_classes and (current_time - last_publish["car"] > PUBLISH_COOLDOWN):
                     mqtt_client.publish(os.getenv("MQTT_TOPIC"), "open_big")
@@ -427,13 +401,10 @@ def camera_processing():
                     last_publish["person"] = current_time
                     add_log("MQTT", "Sent: scan_person")
 
-            # 2. NEW FEATURE: PERIODIC 30-MIN SCAN + MOTION SCAN
             elapsed_since_last_ai = current_time - last_capture_time
             
-            # Trigger A: Motion (Person/Car) detected + Interval passed
             motion_trigger = any(t in detected_classes for t in ["person", "car"]) and (elapsed_since_last_ai >= GEMINI_INTERVAL)
             
-            # Trigger B: 30 Minutes (1800s) passed without any check (Periodic Scan)
             periodic_trigger = elapsed_since_last_ai >= 1800 
 
             if motion_trigger or periodic_trigger:
@@ -458,18 +429,15 @@ def camera_processing():
 
 def save_snapshot_thread(file_path, frame):
     try:
-        # Save file locally
         cv2.imwrite(file_path, frame)
         
-        # SKIP Gemini API. Directly save to DB.
         filename = os.path.basename(file_path)
-        static_analysis = "Manual Snapshot" # Static label for the dashboard
+        static_analysis = "Manual Snapshot"
         
         storeevent(filename, static_analysis)
         
         add_log("CONTROL", f"Snapshot saved: {filename}")
         
-        # Update Frontend immediately
         socketio.emit('new_event', {
             "timestamp": datetime.datetime.now().isoformat(),
             "type": "manual_capture",
@@ -480,7 +448,7 @@ def save_snapshot_thread(file_path, frame):
     except Exception as e:
         add_log("ERROR", f"Snapshot failed: {e}")
 
-# ================= FLASK ROUTES =================
+#FLASK ROUTES
 @app.route('/api/on', methods=['POST'])
 def turn_light_on():
     if bulb:
@@ -506,7 +474,7 @@ def video_feed():
     def generate():
         global outputFrame, lock
         
-        # Create a black placeholder frame if camera is broken
+        
         blank_frame = np.zeros((360, 640, 3), np.uint8)
         cv2.putText(blank_frame, "NO SIGNAL", (200, 180), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         
@@ -517,9 +485,6 @@ def video_feed():
                 else:
                     frame_to_encode = outputFrame
 
-            # --- OPTIMIZATION 1: COMPRESSION ---
-            # We explicitly use JPEG Quality 50 (defined globally) to reduce file size
-            # This makes the stream much faster over Wi-Fi
             flag, encodedImage = cv2.imencode(".jpg", frame_to_encode, [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY])
             
             if not flag:
@@ -527,15 +492,11 @@ def video_feed():
 
             yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + 
                   bytearray(encodedImage) + b'\r\n')
-            
-            # --- OPTIMIZATION 2: SYNC FPS ---
-            # Sleep for 0.04s (approx 25 FPS) instead of 0.01s (100 FPS).
-            # This prevents sending duplicate frames and saves network bandwidth.
+        
             time.sleep(0.04)
             
     return Response(generate(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
-# ================= NEW ORGANIZED API ENDPOINTS =================
 
 @app.route('/api/devices', methods=['GET'])
 def get_devices():
@@ -599,34 +560,26 @@ def health_check():
         "recording": recording,
         "timestamp": datetime.datetime.now().isoformat()
     })
-# --- ADD THIS NEW ROUTE TO SERVE IMAGES ---
 @app.route('/frames/<path:filename>')
 def serve_frames(filename):
-    # This allows the frontend to access images in your 'Frames' folder
     return send_from_directory(os.path.join(PROJECT_ROOT, 'Frames'), filename)
 
-# --- REPLACE THE EXISTING 'get_events' FUNCTION ---
 @app.route('/api/events', methods=['GET'])
 def get_events():
     """Fetch real event history from MySQL"""
     try:
-        # Connect to your Database
         mydb = mysql.connector.connect(
             host="localhost",
             user="root",
             password="Kenstar1",
             database="detectrecord"
         )
-        cursor = mydb.cursor(dictionary=True) # dictionary=True makes accessing columns easier
-
-        # Get last 20 events, newest first
+        cursor = mydb.cursor(dictionary=True) 
         cursor.execute("SELECT * FROM events ORDER BY timestamp DESC LIMIT 20")
         rows = cursor.fetchall()
         
         events_data = []
         for row in rows:
-            # Create a valid URL for the browser
-            # We use 'image_name' from your DB to build the link
             image_url = f"{request.host_url}frames/{row['image_name']}"
             
             events_data.append({
@@ -653,13 +606,11 @@ def manual_capture():
 
     try:
         capturedframe += 1
-        # timestamped filename
         filename = f"Frames/manual_{int(time.time())}.jpg"
         
         with lock:
             frame_to_process = latest_hq_frame.copy()
 
-        # START THE FAST THREAD (No AI)
         threading.Thread(target=save_snapshot_thread, 
                          args=(filename, frame_to_process)).start()
 
@@ -668,7 +619,7 @@ def manual_capture():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# ================= WEBSOCKET HANDLERS =================
+#  WEBSOCKET HANDLERS
 
 @socketio.on('connect')
 def handle_connect():
@@ -683,7 +634,7 @@ def handle_disconnect():
 def handle_log_request():
     emit('logs_update', list(system_logs))
 
-# ================= STARTUP =================
+# STARTUP 
 
 if __name__ == '__main__':
     add_log("SYSTEM", "Starting Flask server...")
@@ -692,5 +643,4 @@ if __name__ == '__main__':
     t.daemon = True
     t.start()
     
-    # Use SocketIO run instead of app.run
     socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
